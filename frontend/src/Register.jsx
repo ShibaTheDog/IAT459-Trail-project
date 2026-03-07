@@ -1,0 +1,113 @@
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+
+import "./stylesheets/main.css";
+import "./stylesheets/authentication.css";
+
+import hikingHero from "./assets/hiking-hero.png";
+
+function Register() {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Registration successful! Please log in.");
+        navigate("/login");
+      } else {
+        setError(data.message || data.error || "Registration failed");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("An error occurred. Please try again.");
+    }
+  };
+
+  return (
+    <div className="auth-page-container">
+      <div className="auth-hero-img-container">
+        <img
+          src={hikingHero}
+          alt="Hikers on a hiking trail"
+          className="auth-hero-img"
+        ></img>
+      </div>
+
+      <div className="auth-container">
+        <div className="auth-form-container-content">
+          <div className="auth-header">
+            <h1>Welcome back</h1>
+            <p>Login to explore Vancouver hiking trail</p>
+          </div>
+        </div>
+
+        {error && <p className="error-message">{error}</p>}
+
+        <form className="auth-form" onSubmit={handleRegister}>
+          <div className="form-group">
+            <label>Username</label>
+            <input
+              type="text"
+              id="username"
+              placeholder="Choose a username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Email</label>
+            <input
+              type="email"
+              id="email"
+              placeholder="Choose an email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Password</label>
+            <input
+              type="password"
+              id="password"
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-buttons">
+            <button type="submit" className="button-primary">
+              Create Account
+            </button>
+
+            <Link to="/login" className="button-secondary">
+              Sign up
+            </Link>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+export default Register;
