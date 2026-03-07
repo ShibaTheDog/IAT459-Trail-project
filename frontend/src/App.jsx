@@ -10,6 +10,7 @@ import Dashboard from "./Dashboard";
 import Login from "./Login";
 import ProtectedRoute from "./ProtectedRoute";
 import Register from "./Register";
+import TrailForm from "./TrailForm";
 
 function App() {
   return (
@@ -18,19 +19,18 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-
-          <Route path="/dashboard" element={<Dashboard />} />
-
-          {/* <Route
-            path="/dashboard"
+          <Route
+            path="/create-post"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <TrailForm />
               </ProtectedRoute>
             }
-          /> */}
+          />
+
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
         </Routes>
       </Router>
     </AuthProvider>

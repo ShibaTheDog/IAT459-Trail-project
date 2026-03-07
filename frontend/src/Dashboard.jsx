@@ -5,16 +5,8 @@ import { AuthContext } from "./context/AuthContext";
 
 function Dashboard() {
   const [trails, setTrails] = useState([]);
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    tag: "",
-    imgUrl: "",
-  });
-
   const navigate = useNavigate();
-
-  const { token, user, logout } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
 
   useEffect(() => {
     fetch("http://localhost:5000/api/trails")
@@ -22,47 +14,6 @@ function Dashboard() {
       .then((data) => setTrails(data))
       .catch((err) => console.error("Error fetching trails:", err));
   }, []);
-
-  function handleChange(e) {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  }
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-
-    try {
-      const response = await fetch("http://localhost:5000/api/trails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token,
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to post trail. Are you authorized?");
-      }
-
-      const newTrail = await response.json();
-
-      setTrails([...trails, newTrail]);
-
-      // Clear the form
-      setFormData({
-        title: "",
-        description: "",
-        tag: "",
-        imgUrl: "",
-      });
-    } catch (err) {
-      console.error(err);
-      alert(err.message);
-    }
-  }
 
   return (
     <div className="dashboard-container">
@@ -75,101 +26,109 @@ function Dashboard() {
             </button>
           </>
         ) : (
-          <h1> Welcome to TrailTracker</h1>
+          <>
+            <h1>Welcome to TrailTracker</h1>
+            <div className="header-buttons">
+              <button
+                className="login-button"
+                onClick={() => navigate("/login")}
+              >
+                Login
+              </button>
+              <button
+                className="signup-button"
+                onClick={() => navigate("/register")}
+              >
+                Sign Up
+              </button>
+            </div>
+          </>
         )}
       </header>
 
-      {!user && (
-        <div className="dashboard-banner">
-          <p>
-            <strong>You must login or create an account to make a post</strong>
-          </p>
-          <button className="login-button" onClick={() => navigate("/login")}>
-            Login
-          </button>
-        </div>
-      )}
-
-      <div className="trail-form-section">
-        <div className="image-droparea">
-          <p>Drag an image here</p>
-          <input
-            type="text"
-            name="imgUrl"
-            placeholder="Paste Image URL..."
-            value={formData.imgUrl}
-            onChange={handleChange}
-            disabled={!user}
-            className="url-input"
-          />
-        </div>
-
-        <form className="trai-form" onSubmit={handleSubmit}>
-          <div className="input-group">
-            <label>Title</label>
-            <input
-              name="title"
-              placeholder="Add a title"
-              value={formData.title}
-              onChange={handleChange}
-              disabled={!user}
-              required
-            />
-          </div>
-
-          <div className="input-group">
-            <label>Description</label>
-            <input
-              name="description"
-              placeholder="Add a description"
-              value={formData.description}
-              onChange={handleChange}
-              disabled={!user}
-              rows="4"
-              required
-            />
-          </div>
-
-          <div className="input-group">
-            <label>Tag</label>
-            <input
-              name="tag"
-              placeholder="Add taggs"
-              value={formData.tag}
-              onChange={handleChange}
-              disabled={!user}
-            />
-          </div>
-
-          <button type="submit" className="subtmit=button" disabled={!user}>
-            Submit
-          </button>
-        </form>
+      <div className="moments-section">
+        {!user ? (
+          <>
+            <h2>My Trail Moment</h2>
+            <div className="empty-state">
+              <p>
+                <strong>
+                  You must login or create an account to make a post
+                </strong>
+              </p>
+              <button
+                className="login-button"
+                onClick={() => navigate("/login")}
+              >
+                Create a post
+              </button>
+            </div>
+          </>
+        ) : trails.length === 0 ? (
+          <>
+            <h2>My Trail Moment</h2>
+            <div className="empty-state">
+              <p>
+                <strong>
+                  No posts created yet. Why not create a post while your at it?
+                </strong>
+              </p>
+              <button
+                className="login-button"
+                onClick={() => navigate("/create-post")}
+              >
+                Create post
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="section-header-row">
+              <h2>My Trail Moment</h2>
+              <button
+                className="login-button"
+                onClick={() => navigate("/create-post")}
+              >
+                Create post
+              </button>
+            </div>
+            <div className="trails-grid">
+              {trails.map((trail) => (
+                <div key={trail._id || trail.id} className="trail-card">
+                  {trail.imgUrl && <img src={trail.imgUrl} alt={trail.title} />}
+                  <h3>{trail.title}</h3>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
-      <div className="moments-section">
-        <h2>My Trail Moment</h2>
+      <div className="statistics-section">
+        <h2>My Statistics</h2>
 
-        {trails.length === 0 ? (
+        {!user ? (
           <div className="empty-state">
             <p>
-              <strong>
-                No posts created yet. Why not create a post while your at it?
-              </strong>
+              <strong>You must login to view your statistics</strong>
             </p>
           </div>
         ) : (
-          <div className="trails-grid">
-            {trails.map((trail) => (
-              <div key={trail.id} className="trail-card">
-                {trail.imgUrl && <img src={trail.imgUrl} alt={trail.title} />}
-                <div className="trail-info">
-                  <h3>{trail.title}</h3>
-                  <p>{trail.description}</p>
-                  <span className="trail-tag">{trail.tag}</span>
-                </div>
-              </div>
-            ))}
+          <div className="stats-grid">
+            <div className="stat-item">
+              <span className="stat-number">0</span>
+              <span className="stat-label">Trail visited</span>
+            </div>
+
+            <div className="stat-item">
+              <span className="stat-number">0</span>
+              <span className="stat-label">Trail Moments</span>
+            </div>
+
+            <div className="stat-item">
+              <span className="stat-number">0</span>
+              <span className="stat-label">Hours Hiked</span>
+            </div>
           </div>
         )}
       </div>
