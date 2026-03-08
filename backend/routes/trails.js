@@ -20,12 +20,13 @@ router.post("/", verifyToken, async (req, res) => {
   try {
     const newTrail = new Trail({
       ...req.body,
-      user: req.user.id, // This ID comes directly from the decoded JWT wristband
+      user: req.user.id,
     });
 
     await newTrail.save();
     res.status(201).json(newTrail);
   } catch (err) {
+    console.error("TRAIL SAVE ERROR:", err);
     res.status(400).json({ error: err.message });
   }
 });

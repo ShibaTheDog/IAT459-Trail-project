@@ -7,6 +7,12 @@ function Dashboard() {
   const [trails, setTrails] = useState([]);
   const navigate = useNavigate();
   const { token, user, logout } = useContext(AuthContext);
+    const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    tag: "",
+    imgUrl: "",
+  });
 
   useEffect(() => {
     if (!token) {
@@ -28,37 +34,45 @@ function Dashboard() {
   }
 
   async function handleSubmit(e) {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const response = await fetch("http://localhost:5000/api/trails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
+  try {
+    const response = await fetch("http://localhost:5000/api/trails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(formData),
+    });
 
-      if (!response.ok) {
-        throw new Error("Failed to post trail. Are you authorized?");
-      }
+    const data = await response.json();
 
-      const newTrail = await response.json();
-
-      setTrails([...trails, newTrail]);
-
-      setFormData({
-        title: "",
-        description: "",
-        tag: "",
-        imgUrl: "",
-      });
-    } catch (err) {
-      console.error(err);
-      alert(err.message);
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to post trail");
     }
+
+    console.log("POST SUCCESS:", data);
+
+    // Add the new post to the UI
+    setTrails([...trails, data]);
+
+    // Show confirmation
+    alert("Trail successfully posted!");
+
+    // Clear the form
+    setFormData({
+      title: "",
+      description: "",
+      tag: "",
+      imgUrl: "",
+    });
+
+  } catch (err) {
+    console.error("POST ERROR:", err);
+    alert(err.message);
   }
+}
 
   return (
     <div className="dashboard-container">
