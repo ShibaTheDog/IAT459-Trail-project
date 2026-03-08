@@ -53,8 +53,8 @@ function Login() {
       <div className="auth-container">
         <div className="auth-form-container-content">
           <div className="auth-header">
-            <h1>Welcome to TrailTracker</h1>
-            <p>Create an account to explore Vancouver hiking trail</p>
+            <h1>Welcome back</h1>
+            <p>Login to explore Vancouver hiking trail</p>
           </div>
         </div>
 
