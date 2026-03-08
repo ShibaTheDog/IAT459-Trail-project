@@ -1,28 +1,25 @@
 const mongoose = require("mongoose");
 
-//EDIT FILE TO REFLECT TRAIL PROFILE
-
-const PlantSchema = new mongoose.Schema({
-  // new Owner field:
-  owner: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User", // points to the User collection
+const trailSchema = new mongoose.Schema({
+  title: {
+    type: String,
     required: true,
-  },
-  // updated fields to match .csv headers
-  trail_name: {
-    type: String,
-    default: "Unknown Trail",
-  },
-  family: {
-    type: String,
   },
   description: {
     type: String,
+    required: true,
   },
-  img_url: {
+  tag: {
     type: String,
+  },
+  imgUrl: {
+    type: String,
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
   },
 });
 
-module.exports = mongoose.model("Plant", PlantSchema);
+module.exports = mongoose.model("Trail", trailSchema);

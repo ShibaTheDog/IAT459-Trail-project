@@ -31,7 +31,7 @@ function Login() {
 
       if (res.ok) {
         login(data.token);
-        navigate("/");
+        navigate("/Dashboard");
       } else {
         alert(data.message || "Login failed");
       }
