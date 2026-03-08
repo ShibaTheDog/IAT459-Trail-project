@@ -5,13 +5,6 @@ import { AuthContext } from "./context/AuthContext";
 
 function Dashboard() {
   const [trails, setTrails] = useState([]);
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    tag: "",
-    imgUrl: "",
-  });
-
   const navigate = useNavigate();
   const { token, user, logout } = useContext(AuthContext);
 
@@ -138,10 +131,10 @@ function Dashboard() {
         </form>
       </div>
 
-      <div className="moments-section">
-        <h2>My Trail Moment</h2>
+      <div className="statistics-section">
+        <h2>My Statistics</h2>
 
-        {trails.length === 0 ? (
+        {!user ? (
           <div className="empty-state">
             <p>
               <strong>No posts created yet.</strong>
