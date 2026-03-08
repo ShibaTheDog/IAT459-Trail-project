@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-//EDIT FILE TO REFLECT USER PROFILE
+//EDIT FILE TO REFLECT TRAIL PROFILE
 
 const PlantSchema = new mongoose.Schema({
   // new Owner field:
@@ -10,23 +10,16 @@ const PlantSchema = new mongoose.Schema({
     required: true,
   },
   // updated fields to match .csv headers
-  common_name: {
+  trail_name: {
     type: String,
-    default: "Unknown Plant",
+    default: "Unknown Trail",
   },
   family: {
     type: String,
   },
-  categories: {
+  description: {
     type: String,
   },
-  origin: {
-    type: String,
-  },
-  climate: {
-    type: String,
-  },
-
   img_url: {
     type: String,
   },

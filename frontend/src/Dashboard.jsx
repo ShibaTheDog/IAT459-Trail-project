@@ -13,15 +13,19 @@ function Dashboard() {
   });
 
   const navigate = useNavigate();
-
   const { token, user, logout } = useContext(AuthContext);
 
   useEffect(() => {
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
     fetch("http://localhost:5000/api/trails")
       .then((res) => res.json())
       .then((data) => setTrails(data))
       .catch((err) => console.error("Error fetching trails:", err));
-  }, []);
+  }, [token, navigate]);
 
   function handleChange(e) {
     setFormData({
@@ -38,7 +42,7 @@ function Dashboard() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: token,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(formData),
       });
@@ -51,7 +55,6 @@ function Dashboard() {
 
       setTrails([...trails, newTrail]);
 
-      // Clear the form
       setFormData({
         title: "",
         description: "",
@@ -69,26 +72,19 @@ function Dashboard() {
       <header className="dashboard-header">
         {user ? (
           <>
-            <h1> Welcome {user.username}</h1>
-            <button className="logout-button" onClick={logout}>
+            <h1>Welcome {user.username}</h1>
+            <button
+              className="logout-button"
+              onClick={() => {
+                logout();
+                navigate("/login");
+              }}
+            >
               Logout
             </button>
           </>
-        ) : (
-          <h1> Welcome to TrailTracker</h1>
-        )}
+        ) : null}
       </header>
-
-      {!user && (
-        <div className="dashboard-banner">
-          <p>
-            <strong>You must login or create an account to make a post</strong>
-          </p>
-          <button className="login-button" onClick={() => navigate("/login")}>
-            Login
-          </button>
-        </div>
-      )}
 
       <div className="trail-form-section">
         <div className="image-droparea">
@@ -99,12 +95,11 @@ function Dashboard() {
             placeholder="Paste Image URL..."
             value={formData.imgUrl}
             onChange={handleChange}
-            disabled={!user}
             className="url-input"
           />
         </div>
 
-        <form className="trai-form" onSubmit={handleSubmit}>
+        <form className="trail-form" onSubmit={handleSubmit}>
           <div className="input-group">
             <label>Title</label>
             <input
@@ -112,7 +107,6 @@ function Dashboard() {
               placeholder="Add a title"
               value={formData.title}
               onChange={handleChange}
-              disabled={!user}
               required
             />
           </div>
@@ -124,8 +118,6 @@ function Dashboard() {
               placeholder="Add a description"
               value={formData.description}
               onChange={handleChange}
-              disabled={!user}
-              rows="4"
               required
             />
           </div>
@@ -134,14 +126,13 @@ function Dashboard() {
             <label>Tag</label>
             <input
               name="tag"
-              placeholder="Add taggs"
+              placeholder="Add tags"
               value={formData.tag}
               onChange={handleChange}
-              disabled={!user}
             />
           </div>
 
-          <button type="submit" className="subtmit=button" disabled={!user}>
+          <button type="submit" className="submit-button">
             Submit
           </button>
         </form>
@@ -153,15 +144,13 @@ function Dashboard() {
         {trails.length === 0 ? (
           <div className="empty-state">
             <p>
-              <strong>
-                No posts created yet. Why not create a post while your at it?
-              </strong>
+              <strong>No posts created yet.</strong>
             </p>
           </div>
         ) : (
           <div className="trails-grid">
             {trails.map((trail) => (
-              <div key={trail.id} className="trail-card">
+              <div key={trail._id} className="trail-card">
                 {trail.imgUrl && <img src={trail.imgUrl} alt={trail.title} />}
                 <div className="trail-info">
                   <h3>{trail.title}</h3>
