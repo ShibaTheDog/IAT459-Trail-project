@@ -11,6 +11,7 @@ import Login from "./Login";
 import ProtectedRoute from "./ProtectedRoute";
 import Register from "./Register";
 import TrailForm from "./TrailForm";
+import TrailDetail from "./TrailDetail";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           />
 
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/trail/:id" element={<TrailDetail />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Routes>

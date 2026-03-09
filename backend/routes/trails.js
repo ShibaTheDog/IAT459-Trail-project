@@ -4,13 +4,33 @@ const Trail = require("../models/Trail");
 const verifyToken = require("../middleware/auth"); // Your security guard!
 
 // GET ROUTE: Open to visitors (Unauthenticated)
-// Anyone can view the trails
+// Anyone can view all the trails
 router.get("/", async (req, res) => {
   try {
     const trails = await Trail.find().populate("user", "username"); // Grabs the creator's username
     res.json(trails);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// GET A SINGLE TRAIL ROUTE: Open to visitors
+// This is the missing piece for your TrailDetail page!
+router.get("/:id", async (req, res) => {
+  try {
+    const trail = await Trail.findById(req.params.id).populate(
+      "user",
+      "username",
+    );
+
+    if (!trail) {
+      return res.status(404).json({ message: "Trail not found" });
+    }
+
+    res.json(trail);
+  } catch (err) {
+    console.error("Error fetching single trail:", err);
+    res.status(500).json({ error: "Server error fetching trail details" });
   }
 });
 

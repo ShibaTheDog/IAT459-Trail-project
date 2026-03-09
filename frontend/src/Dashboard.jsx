@@ -15,6 +15,22 @@ function Dashboard() {
       .catch((err) => console.error("Error fetching trails:", err));
   }, []);
 
+  const myTrails = user
+    ? trails.filter((trail) => {
+        const postUserId = trail.user?._id || trail.user;
+        const loggedInUserId = user?.id || user?._id;
+        return postUserId === loggedInUserId;
+      })
+    : [];
+
+  const otherTrails = user
+    ? trails.filter((trail) => {
+        const postUserId = trail.user?._id || trail.user;
+        const loggedInUserId = user?.id || user?._id;
+        return postUserId !== loggedInUserId;
+      })
+    : trails;
+
   return (
     <div className="dashboard-container">
       <header className="dashboard-header">
@@ -46,6 +62,32 @@ function Dashboard() {
         )}
       </header>
 
+      <div className="moments-section" style={{ marginBottom: "50px" }}>
+        <h2>Check Out Other Moment</h2>
+        {otherTrails.length === 0 ? (
+          <div className="empty-state">
+            <p>
+              <strong>No moments shared by others yet.</strong>
+            </p>
+          </div>
+        ) : (
+          <div className="trails-grid">
+            {otherTrails.map((trail) => (
+              <div
+                key={trail._id || trail.id}
+                className="trail-card"
+                onClick={() => navigate(`/trail/${trail._id || trail.id}`)}
+              >
+                {trail.imgUrl && <img src={trail.imgUrl} alt={trail.title} />}
+                <div className="trail-info">
+                  <h3>{trail.title}</h3>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       <div className="moments-section">
         {!user ? (
           <>
@@ -64,7 +106,7 @@ function Dashboard() {
               </button>
             </div>
           </>
-        ) : trails.length === 0 ? (
+        ) : myTrails.length === 0 ? (
           <>
             <h2>My Trail Moment</h2>
             <div className="empty-state">
@@ -94,10 +136,16 @@ function Dashboard() {
               </button>
             </div>
             <div className="trails-grid">
-              {trails.map((trail) => (
-                <div key={trail._id || trail.id} className="trail-card">
+              {myTrails.map((trail) => (
+                <div
+                  key={trail._id || trail.id}
+                  className="trail-card"
+                  onClick={() => navigate(`/trail/${trail._id || trail.id}`)}
+                >
                   {trail.imgUrl && <img src={trail.imgUrl} alt={trail.title} />}
-                  <h3>{trail.title}</h3>
+                  <div className="trail-info">
+                    <h3>{trail.title}</h3>
+                  </div>
                 </div>
               ))}
             </div>
@@ -122,7 +170,7 @@ function Dashboard() {
             </div>
 
             <div className="stat-item">
-              <span className="stat-number">{trails.length}</span>
+              <span className="stat-number">{myTrails.length}</span>
               <span className="stat-label">Trail Moments</span>
             </div>
 
