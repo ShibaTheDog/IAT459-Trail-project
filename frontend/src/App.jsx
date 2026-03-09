@@ -21,6 +21,20 @@ function App() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
           <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/trail/:id" element={<TrailDetail />} />
+
+          <Route
             path="/create-post"
             element={
               <ProtectedRoute>
@@ -28,11 +42,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/trail/:id" element={<TrailDetail />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
         </Routes>
       </Router>
     </AuthProvider>
