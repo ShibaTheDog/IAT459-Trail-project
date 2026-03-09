@@ -12,6 +12,7 @@ import hikingHero from "./assets/hiking-hero.png";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const { login } = useContext(AuthContext);
 
@@ -19,6 +20,7 @@ function Login() {
 
   async function handleLogin(e) {
     e.preventDefault();
+    setError("");
 
     try {
       const res = await fetch("http://localhost:5000/api/auth/login", {
@@ -33,10 +35,11 @@ function Login() {
         login(data.token);
         navigate("/Dashboard");
       } else {
-        alert(data.message || "Login failed");
+        setError(data.message || "Login failed");
       }
     } catch (err) {
       console.error(err);
+      setError("An error occurred. Please try again later.");
     }
   }
 
@@ -57,6 +60,8 @@ function Login() {
             <p>Login to explore Vancouver hiking trail</p>
           </div>
         </div>
+
+        {error && <div className="error-message">{error}</div>}
 
         <form className="auth-form" onSubmit={handleLogin}>
           <div className="form-group">

@@ -11,11 +11,13 @@ function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
 
     try {
       const res = await fetch("http://localhost:5000/api/auth/register", {
@@ -27,8 +29,10 @@ function Register() {
       const data = await res.json();
 
       if (res.ok) {
-        alert("Registration successful! Please log in.");
-        navigate("/login");
+        setSuccess("Registration successful! Please log in.");
+        setTimeout(() => {
+          navigate("/login");
+        }, 1000);
       } else {
         setError(data.message || data.error || "Registration failed");
       }
@@ -57,6 +61,7 @@ function Register() {
         </div>
 
         {error && <p className="error-message">{error}</p>}
+        {success && <p className="success-message">{success}</p>}
 
         <form className="auth-form" onSubmit={handleRegister}>
           <div className="form-group">

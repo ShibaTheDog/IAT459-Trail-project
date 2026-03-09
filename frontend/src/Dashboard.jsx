@@ -70,7 +70,8 @@ function Dashboard() {
             <div className="empty-state">
               <p>
                 <strong>
-                  No posts created yet. Why not create a post while your at it?
+                  No posts created yet. Why not create a post while you're at
+                  it?
                 </strong>
               </p>
               <button
@@ -121,7 +122,7 @@ function Dashboard() {
             </div>
 
             <div className="stat-item">
-              <span className="stat-number">0</span>
+              <span className="stat-number">{trails.length}</span>
               <span className="stat-label">Trail Moments</span>
             </div>
 
