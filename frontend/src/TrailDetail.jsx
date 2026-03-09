@@ -1,12 +1,16 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { AuthContext } from "./context/AuthContext";
 import "./stylesheets/detail.css";
 
 function TrailDetail() {
   const { id } = useParams();
   const [trail, setTrail] = useState(null);
   const [error, setError] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
   const navigate = useNavigate();
+  const { token, user } = useContext(AuthContext);
 
   useEffect(() => {
     fetch(`http://localhost:5000/api/trails/${id}`)
@@ -23,6 +27,39 @@ function TrailDetail() {
       });
   }, [id]);
 
+  async function handleDelete() {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this trail post?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      setDeleteLoading(true);
+
+      const response = await fetch(`http://localhost:5000/api/trails/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to delete trail");
+      }
+
+      alert("Trail deleted successfully.");
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert(err.message);
+    } finally {
+      setDeleteLoading(false);
+    }
+  }
+
   if (error) {
     return (
       <div className="dashboard-container">
@@ -38,6 +75,11 @@ function TrailDetail() {
   if (!trail) {
     return <div className="dashboard-container">Loading...</div>;
   }
+
+  const isOwner =
+    user &&
+    trail.user &&
+    (trail.user._id === user.id || trail.user === user.id);
 
   return (
     <div className="dashboard-page">
@@ -61,6 +103,18 @@ function TrailDetail() {
           <p className="trail-detail-description">{trail.description}</p>
 
           {trail.tag && <div className="trail-detail-tag">{trail.tag}</div>}
+
+          {isOwner && (
+            <div className="trail-delete-container">
+              <button
+                onClick={handleDelete}
+                className="trail-delete-button"
+                disabled={deleteLoading}
+              >
+                {deleteLoading ? "Deleting..." : "Delete Trail"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -54,12 +54,22 @@ router.post("/", verifyToken, async (req, res) => {
 // DELETE ROUTE: Protected
 router.delete("/:id", verifyToken, async (req, res) => {
   try {
-    const deletedTrail = await Trail.findByIdAndDelete(req.params.id);
-    if (!deletedTrail)
+    const trail = await Trail.findById(req.params.id);
+
+    if (!trail) {
       return res.status(404).json({ error: "Trail not found" });
+    }
+
+    // Check if the logged-in user owns the trail
+    if (trail.user.toString() !== req.user.id) {
+      return res.status(403).json({ error: "You are not authorized to delete this trail" });
+    }
+
+    await Trail.findByIdAndDelete(req.params.id);
 
     res.json({ message: "Trail successfully deleted" });
   } catch (err) {
+    console.error("DELETE ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
