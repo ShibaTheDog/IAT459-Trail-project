@@ -274,40 +274,22 @@ function Dashboard() {
         )}
       </div>
 
-      <div className="search-Selection">
+      <div className="search-selection">
         <h2>Trail Search</h2>
         <input
           type="text"
           placeholder="Search trails..."
           value={searchQuery}
           onChange={handleSearch}
-          style={{
-            width: "100%",
-            padding: "10px",
-            borderRadius: "6px",
-            border: "1px solid #ccc",
-          }}
+          className="trail-search-input"
         />
 
         {searchResults.length > 0 && (
-          <div
-            style={{
-              position: "absolute",
-              width: "100%",
-              background: "white",
-              border: "1px solid #ccc",
-              borderTop: "none",
-              zIndex: 10,
-            }}
-          >
+          <div className="search-dropdown">
             {searchResults.map((trail) => (
               <div
                 key={trail.id}
-                style={{
-                  padding: "10px",
-                  cursor: "pointer",
-                  borderBottom: "1px solid #eee",
-                }}
+                className="search-result-item"
                 onClick={() => navigate(`/trail-result/${trail.id}`)}
               >
                 {trail.trailTitle}
@@ -316,7 +298,8 @@ function Dashboard() {
           </div>
         )}
       </div>
-      <div style={{ height: "15rem" }}></div>
+
+      <div className="bottom-buffer"></div>
 
     </div>
   );
