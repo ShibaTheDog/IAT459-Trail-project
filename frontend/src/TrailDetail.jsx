@@ -1,8 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
-import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from "@react-google-maps/api";
-import { dataSet } from "./assets/dataSet";
 import "./stylesheets/detail.css";
 
 function TrailDetail() {

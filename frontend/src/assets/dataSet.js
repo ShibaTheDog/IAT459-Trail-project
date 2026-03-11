@@ -169,7 +169,9 @@ export const dataSet = [
     "season": "July-September",
     "camping": false,
     "publicTransit": true,
-    "dogFriendly": true
+    "dogFriendly": true,
+    "lat": 49.3581495,
+    "lng": -123.0526183
   },
   {
     "id": "3730fb9a053211ec9f58cf7d0294de9c",
