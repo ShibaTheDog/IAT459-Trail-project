@@ -53,7 +53,7 @@ function Dashboard() {
       trail.trailTitle.toLowerCase().includes(value.toLowerCase())
     );
 
-    setSearchResults(filtered.slice(0, 5)); // limit to top 5 results
+    setSearchResults(filtered.slice(0, 5)); 
   }
 
   const myTrails = user

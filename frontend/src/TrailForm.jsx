@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import "./stylesheets/dashboard.css";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
+import { dataSet } from "./assets/dataSet";
 
 function TrailForm() {
   const [formData, setFormData] = useState({
@@ -10,10 +11,13 @@ function TrailForm() {
     tag: "",
     imgUrl: "",
   });
-  const [previewUrl, setPreviewUrl] = useState(null);
 
+  const [previewUrl, setPreviewUrl] = useState(null);
   const navigate = useNavigate();
   const { token, user } = useContext(AuthContext);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,6 +41,27 @@ function TrailForm() {
     const file = e.dataTransfer.files[0];
     handleDrag(file);
   };
+
+  function handleSearch(e) {
+    const value = e.target.value;
+    setSearchQuery(value);
+
+    if (value.trim() === "") {
+      setSearchResults([]);
+      return;
+    }
+
+    const filtered = dataSet.filter((trail) =>
+      trail.trailTitle.toLowerCase().includes(value.toLowerCase())
+    );
+    setSearchResults(filtered.slice(0, 5));
+  }
+  const selectTrail = (trail) => {
+    setFormData({ ...formData, tag: trail.trailTitle });
+    setSearchQuery(trail.trailTitle);
+    setSearchResults([]);
+  };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -120,14 +145,35 @@ function TrailForm() {
           </div>
 
           <div className="input-group">
-            <label>Tag</label>
-            <input
-              name="tag"
-              placeholder="Add tags"
-              value={formData.tag}
-              onChange={handleChange}
-              disabled={!user}
-            />
+            <label>Select Trail Tag</label>
+            <div className="search-selection">
+              <input
+                type="text"
+                placeholder="Search trails..."
+                value={searchQuery}
+                onChange={handleSearch}
+                className="trail-search-input"
+                disabled={!user}
+              />
+              {searchResults.length > 0 && (
+                <div className="search-dropdown">
+                  {searchResults.map((trail) => (
+                    <div
+                      key={trail.id}
+                      className="search-result-item"
+                      onClick={() => selectTrail(trail)}
+                    >
+                      {trail.trailTitle}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="input-group">
+            <label>Selected Trail</label>
+            <input value={formData.tag || "N/A"} disabled />
           </div>
 
           <button type="submit" className="submit-button" disabled={!user}>

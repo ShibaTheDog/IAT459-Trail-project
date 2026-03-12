@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { dataSet } from "./assets/dataSet";
 import "./stylesheets/detail.css";
 
@@ -6,7 +7,16 @@ function TrailResult() {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const [trails, setTrails] = useState([]);
+
   const trail = dataSet.find((t) => t.id === id);
+
+  useEffect(() => {
+    fetch("http://localhost:5000/api/trails")
+      .then((res) => res.json())
+      .then((data) => setTrails(data))
+      .catch((err) => console.error("Error fetching trails:", err));
+  }, []);
 
   if (!trail) {
     return (
@@ -22,6 +32,13 @@ function TrailResult() {
     );
   }
 
+  const matchingPosts = trails.filter(
+    (post) =>
+      post.tag &&
+      trail.trailTitle &&
+      post.tag.toLowerCase().trim() === trail.trailTitle.toLowerCase().trim()
+  );
+
   return (
     <div className="dashboard-page">
 
@@ -35,7 +52,6 @@ function TrailResult() {
       </div>
 
       <div className="trail-detail-container">
-
         <div className="trail-detail-info-section">
 
           <h1 className="trail-detail-title">
@@ -66,6 +82,30 @@ function TrailResult() {
           </p>
 
         </div>
+      </div>
+
+      <div className="trail-posts-section">
+
+        <h2>Posts for this Trail</h2>
+
+        {matchingPosts.length === 0 ? (
+          <p>No posts yet for this trail.</p>
+        ) : (
+          <div className="trails-grid">
+            {matchingPosts.map((post) => (
+              <div
+                key={post._id}
+                className="trail-card"
+                onClick={() => navigate(`/trail/${post._id}`)}
+              >
+                {post.imgUrl && <img src={post.imgUrl} alt={post.title} />}
+                <div className="trail-info">
+                  <h3>{post.title}</h3>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
       </div>
 

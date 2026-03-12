@@ -85,7 +85,7 @@ function TrailDetail() {
     <div className="dashboard-page">
       <div className="back-button-container">
         <button onClick={() => navigate(-1)} className="logout-button">
-          ← Back to Dashboard
+          ← Back
         </button>
       </div>
 
