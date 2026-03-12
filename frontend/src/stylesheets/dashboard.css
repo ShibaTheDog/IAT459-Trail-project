@@ -262,7 +262,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
+  margin-bottom: 0px;
   width: 100%;
 }
 
@@ -403,4 +403,20 @@
   height: 16px;
   cursor: pointer;
   accent-color: #000;
+}
+
+.no-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  color: #666;
+  font-size: 1.2rem;
+}
+
+.other-moments {
+  margin-bottom: 50px;
 }

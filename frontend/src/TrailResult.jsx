@@ -48,7 +48,6 @@ function TrailResult() {
         <div className="trail-detail-info-section" style={{ width: "100%" }}>
           <h1 className="trail-detail-title">{trail.trailTitle}</h1>
 
-          {/* --- THE NEW 3-COLUMN STATS GRID --- */}
           <div className="trail-stats-grid">
             <div className="stat-box">
               <span className="stat-label">Region</span>
