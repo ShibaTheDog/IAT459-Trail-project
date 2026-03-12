@@ -318,3 +318,38 @@
 .bottom-buffer {
   height: 15rem;
 }
+
+.map-section {
+  width: 100%;
+  margin-top: 50px;
+}
+
+.map-section > div {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.filter-button {
+  display: inline-block;
+  margin-top: 0;
+  margin-right: 15px;
+  margin-bottom: 25px;
+  background-color: #fff;
+  color: #000;
+  border: 1px solid #999;
+  border-radius: 20px;
+  padding: 8px 20px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.filter-button:hover {
+  background-color: #d9d9d9;
+}
+
+.filter-button.active {
+  background-color: #5a75f0;
+  color: white;
+  border-color: #5a75f0;
+}
