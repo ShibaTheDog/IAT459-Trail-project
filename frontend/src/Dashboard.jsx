@@ -14,6 +14,11 @@ function Dashboard() {
   const [trails, setTrails] = useState([]);
   const [selectedTrail, setSelectedTrail] = useState(null);
 
+  const [isDifficultyDropdownOpen, setIsDifficultyDropdownOpen] =
+    useState(false);
+  const [isPostFilterDropdownOpen, setIsPostFilterDropdownOpen] =
+    useState(false);
+
   const navigate = useNavigate();
   const { user, logout } = useContext(AuthContext);
 
@@ -103,13 +108,13 @@ function Dashboard() {
             <h1>Welcome to TrailTracker</h1>
             <div className="header-buttons">
               <button
-                className="login-button"
+                className="button-outline" // Changed from login-button
                 onClick={() => navigate("/login")}
               >
                 Login
               </button>
               <button
-                className="signup-button"
+                className="button-primary" // Changed from signup-button
                 onClick={() => navigate("/register")}
               >
                 Sign Up
@@ -159,7 +164,7 @@ function Dashboard() {
                 className="login-button"
                 onClick={() => navigate("/login")}
               >
-                Create a post
+                Login
               </button>
             </div>
           </>
@@ -214,6 +219,9 @@ function Dashboard() {
             <p>
               <strong>You must login to view your statistics</strong>
             </p>
+            <button className="login-button" onClick={() => navigate("/login")}>
+              Login
+            </button>
           </div>
         ) : (
           <div className="stats-grid">
@@ -236,25 +244,51 @@ function Dashboard() {
       <div className="map-section">
         <h2>Trail Map</h2>
 
-        <div className="filter-group">
+        <div className="filter-dropdown-container">
           <button
-            className={`filter-button ${showEasy ? "active" : ""}`}
-            onClick={() => setShowEasy(!showEasy)}
+            className="dropdown-toggle-button"
+            onClick={() =>
+              setIsDifficultyDropdownOpen(!isDifficultyDropdownOpen)
+            }
           >
-            Easy
+            Difficulty
+            <span
+              className={`dropdown-arrow ${isDifficultyDropdownOpen ? "open" : ""}`}
+            >
+              &#9662;
+            </span>
           </button>
-          <button
-            className={`filter-button ${showIntermediate ? "active" : ""}`}
-            onClick={() => setShowIntermediate(!showIntermediate)}
-          >
-            Intermediate
-          </button>
-          <button
-            className={`filter-button ${showDifficult ? "active" : ""}`}
-            onClick={() => setShowDifficult(!showDifficult)}
-          >
-            Difficult
-          </button>
+
+          {isDifficultyDropdownOpen && (
+            <div className="dropdown-menu">
+              <label className="dropdown-item">
+                <input
+                  type="checkbox"
+                  checked={showEasy}
+                  onChange={() => setShowEasy(!showEasy)}
+                />
+                Easy
+              </label>
+
+              <label className="dropdown-item">
+                <input
+                  type="checkbox"
+                  checked={showIntermediate}
+                  onChange={() => setShowIntermediate(!showIntermediate)}
+                />
+                Intermediate
+              </label>
+
+              <label className="dropdown-item">
+                <input
+                  type="checkbox"
+                  checked={showDifficult}
+                  onChange={() => setShowDifficult(!showDifficult)}
+                />
+                Difficult
+              </label>
+            </div>
+          )}
         </div>
 
         {isLoaded && (
@@ -305,33 +339,83 @@ function Dashboard() {
       </div>
 
       <div className="search-selection">
-        <h2>Trail Search</h2>
-        <button
-          className="login-button"
-          onClick={() => setShowOnlyWithPosts((prev) => !prev)}
-        >
-          {showOnlyWithPosts ? "Show All Trails" : "Only Trails With Posts"}
-        </button>
-        <input
-          type="text"
-          placeholder="Search trails..."
-          value={searchQuery}
-          onChange={handleSearch}
-          className="trail-search-input"
-        />
-        {searchResults.length > 0 && (
-          <div className="search-dropdown">
-            {searchResults.map((trail) => (
-              <div
-                key={trail.id}
-                className="search-result-item"
-                onClick={() => navigate(`/trail-result/${trail.id}`)}
+        <div className="search-header-row">
+          <h2>Trail Search</h2>
+
+          <div className="filter-dropdown-container">
+            <button
+              className="dropdown-toggle-button"
+              onClick={() =>
+                setIsPostFilterDropdownOpen(!isPostFilterDropdownOpen)
+              }
+            >
+              {showOnlyWithPosts ? "Trails With Posts" : "All Trails"}
+              <span
+                className={`dropdown-arrow ${isPostFilterDropdownOpen ? "open" : ""}`}
               >
-                {trail.trailTitle}
+                &#9662;
+              </span>
+            </button>
+
+            {isPostFilterDropdownOpen && (
+              <div className="dropdown-menu">
+                <label className="dropdown-item">
+                  <input
+                    type="radio"
+                    name="postFilter"
+                    checked={!showOnlyWithPosts}
+                    onChange={() => {
+                      setShowOnlyWithPosts(false);
+                      setIsPostFilterDropdownOpen(
+                        false,
+                      ); /* Closes menu on click */
+                    }}
+                  />
+                  All Trails
+                </label>
+
+                <label className="dropdown-item">
+                  <input
+                    type="radio"
+                    name="postFilter"
+                    checked={showOnlyWithPosts}
+                    onChange={() => {
+                      setShowOnlyWithPosts(true);
+                      setIsPostFilterDropdownOpen(
+                        false,
+                      ); /* Closes menu on click */
+                    }}
+                  />
+                  Only Trails With Posts
+                </label>
               </div>
-            ))}
+            )}
           </div>
-        )}
+        </div>
+
+        <div className="search-input-container">
+          <input
+            type="text"
+            placeholder="Search trails..."
+            value={searchQuery}
+            onChange={handleSearch}
+            className="trail-search-input"
+          />
+
+          {searchResults.length > 0 && (
+            <div className="search-dropdown">
+              {searchResults.map((trail) => (
+                <div
+                  key={trail.id}
+                  className="search-result-item"
+                  onClick={() => navigate(`/trail-result/${trail.id}`)}
+                >
+                  {trail.trailTitle}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="bottom-buffer"></div>

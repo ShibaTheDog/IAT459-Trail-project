@@ -92,6 +92,14 @@ function Login() {
             <button type="submit" className="button-primary">
               Login
             </button>
+
+            <button
+              type="button"
+              className="button-secondary"
+              onClick={() => navigate("/Dashboard")}
+            >
+              Continue as Guest
+            </button>
           </div>
 
           <div className="auth-regristration-link">

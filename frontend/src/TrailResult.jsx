@@ -22,10 +22,7 @@ function TrailResult() {
     return (
       <div className="dashboard-container">
         <h2>Trail Not Found</h2>
-        <button
-          className="login-button"
-          onClick={() => navigate("/dashboard")}
-        >
+        <button className="login-button" onClick={() => navigate("/dashboard")}>
           Back to Dashboard
         </button>
       </div>
@@ -36,60 +33,80 @@ function TrailResult() {
     (post) =>
       post.tag &&
       trail.trailTitle &&
-      post.tag.toLowerCase().trim() === trail.trailTitle.toLowerCase().trim()
+      post.tag.toLowerCase().trim() === trail.trailTitle.toLowerCase().trim(),
   );
 
   return (
     <div className="dashboard-page">
-
       <div className="back-button-container">
-        <button
-          onClick={() => navigate(-1)}
-          className="logout-button"
-        >
+        <button onClick={() => navigate(-1)} className="logout-button">
           ← Back
         </button>
       </div>
 
       <div className="trail-detail-container">
-        <div className="trail-detail-info-section">
+        <div className="trail-detail-info-section" style={{ width: "100%" }}>
+          <h1 className="trail-detail-title">{trail.trailTitle}</h1>
 
-          <h1 className="trail-detail-title">
-            {trail.trailTitle}
-          </h1>
-
-          <p><strong>Region:</strong> {trail.region}</p>
-          <p><strong>Difficulty:</strong> {trail.difficulty}</p>
-          <p><strong>Time:</strong> {trail.time} hours</p>
-          <p><strong>Trip Time:</strong> {trail.tripTime} km</p>
-          <p><strong>Elevation Gain:</strong> {trail.elevationGain} m</p>
-          <p><strong>Season:</strong> {trail.season}</p>
-          <p><strong>Rating:</strong> {trail.rate}</p>
-
-          <p>
-            <strong>Dog Friendly:</strong>{" "}
-            {trail.dogFriendly ? "Yes" : "No"}
-          </p>
-
-          <p>
-            <strong>Camping:</strong>{" "}
-            {trail.camping ? "Yes" : "No"}
-          </p>
-
-          <p>
-            <strong>Public Transit:</strong>{" "}
-            {trail.publicTransit ? "Yes" : "No"}
-          </p>
-
+          {/* --- THE NEW 3-COLUMN STATS GRID --- */}
+          <div className="trail-stats-grid">
+            <div className="stat-box">
+              <span className="stat-label">Region</span>
+              <span className="stat-value">{trail.region}</span>
+            </div>
+            <div className="stat-box">
+              <span className="stat-label">Difficulty</span>
+              <span className="stat-value">{trail.difficulty}</span>
+            </div>
+            <div className="stat-box">
+              <span className="stat-label">Time</span>
+              <span className="stat-value">{trail.time} hours</span>
+            </div>
+            <div className="stat-box">
+              <span className="stat-label">Distance</span>
+              <span className="stat-value">{trail.tripTime} km</span>
+            </div>
+            <div className="stat-box">
+              <span className="stat-label">Elevation Gain</span>
+              <span className="stat-value">{trail.elevationGain} m</span>
+            </div>
+            <div className="stat-box">
+              <span className="stat-label">Season</span>
+              <span className="stat-value">{trail.season}</span>
+            </div>
+            <div className="stat-box">
+              <span className="stat-label">Rating</span>
+              <span className="stat-value">{trail.rate}</span>
+            </div>
+            <div className="stat-box">
+              <span className="stat-label">Dog Friendly</span>
+              <span className="stat-value">
+                {trail.dogFriendly ? "Yes" : "No"}
+              </span>
+            </div>
+            <div className="stat-box">
+              <span className="stat-label">Camping</span>
+              <span className="stat-value">{trail.camping ? "Yes" : "No"}</span>
+            </div>
+            <div className="stat-box">
+              <span className="stat-label">Public Transit</span>
+              <span className="stat-value">
+                {trail.publicTransit ? "Yes" : "No"}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="trail-posts-section">
-
         <h2>Posts for this Trail</h2>
 
         {matchingPosts.length === 0 ? (
-          <p>No posts yet for this trail.</p>
+          <div className="empty-state">
+            <p>
+              <strong>No posts yet for this trail.</strong>
+            </p>
+          </div>
         ) : (
           <div className="trails-grid">
             {matchingPosts.map((post) => (
@@ -106,9 +123,7 @@ function TrailResult() {
             ))}
           </div>
         )}
-
       </div>
-
     </div>
   );
 }

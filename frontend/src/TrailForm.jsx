@@ -52,7 +52,7 @@ function TrailForm() {
     }
 
     const filtered = dataSet.filter((trail) =>
-      trail.trailTitle.toLowerCase().includes(value.toLowerCase())
+      trail.trailTitle.toLowerCase().includes(value.toLowerCase()),
     );
     setSearchResults(filtered.slice(0, 5));
   }
@@ -61,7 +61,6 @@ function TrailForm() {
     setSearchQuery(trail.trailTitle);
     setSearchResults([]);
   };
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -80,7 +79,6 @@ function TrailForm() {
         throw new Error("Failed to post trail. Are you authorized?");
       }
 
-      // Navigate back to the dashboard after posting
       navigate("/dashboard");
     } catch (err) {
       console.error(err);
@@ -90,6 +88,16 @@ function TrailForm() {
 
   return (
     <div className="dashboard-container">
+      <header className="dashboard-header">
+        <h1>Share Your Trail Moment</h1>
+        <button
+          className="logout-button"
+          onClick={() => navigate("/dashboard")}
+        >
+          Back to Dashboard
+        </button>
+      </header>
+
       <div className="trail-form-section">
         <div
           className={`image-droparea ${!user ? "disabled" : ""}`}

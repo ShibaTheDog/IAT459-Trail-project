@@ -106,7 +106,7 @@ function Register() {
             </button>
 
             <Link to="/login" className="button-secondary">
-              Sign up
+              Log in
             </Link>
           </div>
         </form>

@@ -57,6 +57,24 @@ input::placeholder {
   background-color: #356636;
 }
 
+.button-outline {
+  background-color: transparent;
+  color: #5a75f0;
+  border: 2px solid #5a75f0;
+  padding: 8px 22px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.button-outline:hover {
+  background-color: #f0f3ff;
+  border-color: #4862d9;
+  color: #4862d9;
+}
+
 .button-secondary {
   width: 100%;
   padding: 14px;

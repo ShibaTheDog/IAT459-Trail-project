@@ -21,21 +21,20 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-          <Route
+          {/* <Route
             path="/dashboard"
             element={
               <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>
             }
-          />
+          /> */}
 
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/trail/:id" element={<TrailDetail />} />
           <Route path="/trail-result/:id" element={<TrailResult />} />
-          
 
           <Route
             path="/create-post"
