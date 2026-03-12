@@ -32,6 +32,7 @@ function Dashboard() {
   //search variables
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [showOnlyWithPosts, setShowOnlyWithPosts] = useState(false);
 
   useEffect(() => {
     fetch("http://localhost:5000/api/trails")
@@ -44,16 +45,25 @@ function Dashboard() {
     const value = e.target.value;
     setSearchQuery(value);
 
-    if (value.trim() === "") {
-      setSearchResults([]);
-      return;
+    let filtered = dataSet;
+
+    if (value.trim() !== "") {
+      filtered = dataSet.filter((trail) =>
+        trail.trailTitle.toLowerCase().includes(value.toLowerCase())
+      );
     }
 
-    const filtered = dataSet.filter((trail) =>
-      trail.trailTitle.toLowerCase().includes(value.toLowerCase())
-    );
+    if (showOnlyWithPosts) {
+      filtered = filtered.filter((trail) =>
+        trails.some(
+          (post) =>
+            post.tag &&
+            post.tag.toLowerCase().trim() === trail.trailTitle.toLowerCase().trim()
+        )
+      );
+    }
 
-    setSearchResults(filtered.slice(0, 5)); 
+    setSearchResults(filtered.slice(0, 5));
   }
 
   const myTrails = user
@@ -276,6 +286,12 @@ function Dashboard() {
 
       <div className="search-selection">
         <h2>Trail Search</h2>
+        <button
+          className="login-button"
+          onClick={() => setShowOnlyWithPosts((prev) => !prev)}
+        >
+          {showOnlyWithPosts ? "Show All Trails" : "Only Trails With Posts"}
+        </button>
         <input
           type="text"
           placeholder="Search trails..."
@@ -283,7 +299,6 @@ function Dashboard() {
           onChange={handleSearch}
           className="trail-search-input"
         />
-
         {searchResults.length > 0 && (
           <div className="search-dropdown">
             {searchResults.map((trail) => (
@@ -300,7 +315,6 @@ function Dashboard() {
       </div>
 
       <div className="bottom-buffer"></div>
-
     </div>
   );
 }
