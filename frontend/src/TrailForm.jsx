@@ -154,7 +154,7 @@ function TrailForm() {
 
           <div className="input-group">
             <label>Select Trail Tag</label>
-            <div className="search-selection">
+            <div>
               <input
                 type="text"
                 placeholder="Search trails..."
