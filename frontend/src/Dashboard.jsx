@@ -2,12 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import "./stylesheets/dashboard.css";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
-import {
-  GoogleMap,
-  Marker,
-  InfoWindow,
-  useJsApiLoader,
-} from "@react-google-maps/api";
+import {GoogleMap,Marker,InfoWindow,useJsApiLoader,} from "@react-google-maps/api";
 import { dataSet } from "./assets/dataSet";
 
 function Dashboard() {
@@ -116,12 +111,20 @@ function Dashboard() {
     <div className="dashboard-container">
       <header className="dashboard-header">
         {user ? (
-          <>
-            <h1>Welcome {user.username}</h1>
+         <>
+          <h1>Welcome {user.username}</h1>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button
+              className="login-button"
+              onClick={() => navigate("/profile")}
+            >
+              Profile
+            </button>
             <button className="logout-button" onClick={logout}>
               Logout
             </button>
-          </>
+          </div>
+        </>
         ) : (
           <>
             <h1>Welcome to TrailTracker</h1>
