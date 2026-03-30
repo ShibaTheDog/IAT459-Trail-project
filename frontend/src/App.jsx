@@ -22,14 +22,14 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-          <Route
+          {/* <Route
             path="/dashboard"
             element={
               <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>
             }
-          />
+          /> */}
 
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/login" element={<Login />} />
