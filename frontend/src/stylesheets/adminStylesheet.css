@@ -1,0 +1,117 @@
+.admin-page {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px 20px 100px;
+}
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.admin-back-button {
+  background-color: transparent;
+  color: #555;
+  border: 1px solid #999;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.admin-error {
+  color: #b64e4e;
+  font-weight: 600;
+}
+
+.admin-empty-state {
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 30px;
+}
+
+.admin-report-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-report-card {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 20px;
+  background: white;
+}
+
+.admin-report-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.admin-status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background-color: #fff8e1;
+  color: #b26a00;
+  border: 1px solid #b26a00;
+}
+
+.admin-report-description {
+  margin-bottom: 12px;
+  color: #444;
+}
+
+.admin-report-reasons {
+  margin-top: 16px;
+}
+
+.admin-single-report {
+  border-top: 1px solid #eee;
+  padding-top: 12px;
+  margin-top: 12px;
+}
+
+.admin-view-post-button {
+  margin-top: 16px;
+  background-color: #5a75f0;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.admin-card-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-delete-post-button {
+  background-color: #b64e4e;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.admin-delete-post-button:hover {
+  opacity: 0.9;
+}
+
+.admin-delete-post-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

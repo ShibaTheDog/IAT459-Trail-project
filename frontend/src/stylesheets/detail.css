@@ -65,12 +65,35 @@
   gap: 20px;
 }
 
+.trail-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .trail-detail-title {
   font-size: 2.2rem;
   font-weight: 800;
   color: #000;
   margin-top: 0;
+  margin-bottom: 0;
   line-height: 1.2;
+}
+
+.title-status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.title-status-badge.under-investigation {
+  background-color: #fff8e1;
+  color: #b26a00;
+  border: 1px solid #b26a00;
 }
 
 .trail-detail-description {
@@ -121,13 +144,18 @@
   font-weight: 500;
 }
 
+.trail-report-container {
+  margin-top: 10px;
+}
+
 .trail-delete-container {
   margin-top: auto;
   padding-top: 20px;
   border-top: 1px solid #eee;
 }
 
-.trail-delete-button {
+.trail-delete-button,
+.trail-report-button {
   background-color: #b64e4e;
   color: white;
   border: none;
@@ -139,11 +167,13 @@
   transition: opacity 0.2s ease;
 }
 
-.trail-delete-button:hover {
+.trail-delete-button:hover,
+.trail-report-button:hover {
   opacity: 0.8;
 }
 
-.trail-delete-button:disabled {
+.trail-delete-button:disabled,
+.trail-report-button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
 }
@@ -170,4 +200,155 @@
   border-radius: 8px;
   color: #666;
   font-size: 1.2rem;
+}
+
+.form-message {
+  margin-top: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.form-message.error {
+  color: #b64e4e;
+}
+
+.form-message.success {
+  color: #2e7d32;
+}
+
+.report-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.report-modal {
+  width: 100%;
+  max-width: 520px;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 24px;
+  border: 1px solid #ddd;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
+}
+
+.report-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.report-modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #111;
+}
+
+.report-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #666;
+}
+
+.report-modal-close:hover {
+  color: #000;
+}
+
+.report-modal-close:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.report-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.report-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.report-form-group label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #222;
+}
+
+.report-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #222;
+  background-color: #fff;
+}
+
+.report-input:focus {
+  outline: none;
+  border-color: #1a73e8;
+}
+
+.report-textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+.report-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.report-cancel-button {
+  background-color: #f2f2f2;
+  color: #333;
+  border: 1px solid #bbb;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.report-cancel-button:hover {
+  background-color: #e6e6e6;
+}
+
+.report-cancel-button:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
+}
+
+.report-submit-button {
+  background-color: #b64e4e;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.report-submit-button:hover {
+  opacity: 0.9;
+}
+
+.report-submit-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }

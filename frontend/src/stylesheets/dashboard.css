@@ -30,6 +30,11 @@
   font-weight: bold;
 }
 
+.dashboard-header-actions {
+  display: flex;
+  gap: 10px;
+}
+
 .logout-button {
   background-color: #b64e4e;
   color: white;
@@ -219,6 +224,19 @@
   font-size: 1.2rem;
 }
 
+.trail-investigation-tag {
+  margin-top: 6px;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #b26a00;
+  background-color: #fff8e1;
+  border: 1px solid #b26a00;
+  border-radius: 999px;
+  padding: 4px 10px;
+  display: inline-block;
+}
+
 .statistics-section {
   margin-top: 50px;
   width: 100%;
@@ -280,11 +298,21 @@
   color: #000;
 }
 
-/* search */
 .search-selection {
   width: 100%;
   max-width: 40rem;
   margin-top: 2rem;
+  position: relative;
+}
+
+.search-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.search-input-container {
   position: relative;
 }
 
@@ -326,6 +354,10 @@
 
 .map-section > div {
   border-radius: 12px;
+}
+
+.map-info-window {
+  color: black;
 }
 
 /* --- Dropdown Filter System --- */

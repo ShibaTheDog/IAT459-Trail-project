@@ -14,6 +14,8 @@ import TrailForm from "./TrailForm";
 import TrailDetail from "./TrailDetail";
 import TrailResult from "./TrailResult";
 import Profile from "./Profile";
+import AdminModeration from "./adminModeration";
+import ProtectedAdminRoute from "./ProtectedAdminRoute";
 
 function App() {
   return (
@@ -38,6 +40,7 @@ function App() {
           <Route path="/trail-result/:id" element={<TrailResult />} />
           <Route path="/profile" element={<Profile />} />  {/* probably needs to be protected or something*/}
           
+          
 
           <Route
             path="/create-post"
@@ -45,6 +48,14 @@ function App() {
               <ProtectedRoute>
                 <TrailForm />
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/moderation"
+            element={
+              <ProtectedAdminRoute>
+                <AdminModeration />
+              </ProtectedAdminRoute>
             }
           />
         </Routes>
