@@ -35,6 +35,9 @@ function Profile() {
         throw new Error(data.error || "Failed to delete account");
       }
 
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
       logout();
       navigate("/");
     } catch (err) {
@@ -107,18 +110,40 @@ function Profile() {
         </p>
       </div>
 
-      <button
-        onClick={handleDeleteAccount}
-        disabled={deleting}
+      <div
         style={{
-          padding: "0.75rem 1rem",
-          border: "none",
-          borderRadius: "8px",
-          cursor: deleting ? "not-allowed" : "pointer",
+          display: "flex",
+          gap: "12px",
+          flexWrap: "wrap",
         }}
       >
-        {deleting ? "Deleting..." : "Delete Account"}
-      </button>
+        {user.role === "admin" && (
+          <button
+            onClick={() => navigate("/admin/moderation")}
+            style={{
+              padding: "0.75rem 1rem",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+            }}
+          >
+            Admin Moderation
+          </button>
+        )}
+
+        <button
+          onClick={handleDeleteAccount}
+          disabled={deleting}
+          style={{
+            padding: "0.75rem 1rem",
+            border: "none",
+            borderRadius: "8px",
+            cursor: deleting ? "not-allowed" : "pointer",
+          }}
+        >
+          {deleting ? "Deleting..." : "Delete Account"}
+        </button>
+      </div>
     </div>
   );
 }

@@ -2,7 +2,12 @@ import { useContext, useEffect, useState } from "react";
 import "./stylesheets/dashboard.css";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
-import {GoogleMap,Marker,InfoWindow,useJsApiLoader,} from "@react-google-maps/api";
+import {
+  GoogleMap,
+  Marker,
+  InfoWindow,
+  useJsApiLoader,
+} from "@react-google-maps/api";
 import { dataSet } from "./assets/dataSet";
 
 function Dashboard() {
@@ -17,24 +22,25 @@ function Dashboard() {
   const navigate = useNavigate();
   const { user, logout } = useContext(AuthContext);
 
-  // map variables
   const containerStyle = {
     width: "100%",
     height: "32rem",
   };
+
   const center = {
     lat: 49.2827,
     lng: -123.1207,
   };
+
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyCABOU21t-X5vEFyLq7rzKd__B-dEbXAeE",
   });
+
   const [showEasy, setShowEasy] = useState(true);
   const [showIntermediate, setShowIntermediate] = useState(true);
   const [showDifficult, setShowDifficult] = useState(true);
   const [mapCenter, setMapCenter] = useState(center);
 
-  //search variables
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [showOnlyWithPosts, setShowOnlyWithPosts] = useState(false);
@@ -46,6 +52,10 @@ function Dashboard() {
       .catch((err) => console.error("Error fetching trails:", err));
   }, []);
 
+  const isTrailFlagged = (trail) =>
+    trail.moderationStatus === "under_investigation" ||
+    trail.moderationStatus === "removed";
+
   function handleSearch(e) {
     const value = e.target.value;
     setSearchQuery(value);
@@ -54,7 +64,7 @@ function Dashboard() {
 
     if (value.trim() !== "") {
       filtered = dataSet.filter((trail) =>
-        trail.trailTitle.toLowerCase().includes(value.toLowerCase()),
+        trail.trailTitle.toLowerCase().includes(value.toLowerCase())
       );
     }
 
@@ -62,10 +72,11 @@ function Dashboard() {
       filtered = filtered.filter((trail) =>
         trails.some(
           (post) =>
+            !isTrailFlagged(post) &&
             post.tag &&
             post.tag.toLowerCase().trim() ===
-              trail.trailTitle.toLowerCase().trim(),
-        ),
+              trail.trailTitle.toLowerCase().trim()
+        )
       );
     }
 
@@ -84,13 +95,13 @@ function Dashboard() {
     ? trails.filter((trail) => {
         const postUserId = trail.user?._id || trail.user;
         const loggedInUserId = user?.id || user?._id;
-        return postUserId !== loggedInUserId;
+        return postUserId !== loggedInUserId && !isTrailFlagged(trail);
       })
-    : trails;
+    : trails.filter((trail) => !isTrailFlagged(trail));
 
   const uniqueTrails = [
     ...new Set(
-      myTrails.map((post) => post.tag?.toLowerCase().trim()).filter(Boolean),
+      myTrails.map((post) => post.tag?.toLowerCase().trim()).filter(Boolean)
     ),
   ];
 
@@ -98,12 +109,13 @@ function Dashboard() {
 
   const totalHoursHiked = uniqueTrails.reduce((total, tag) => {
     const matchingTrail = dataSet.find(
-      (t) => t.trailTitle?.toLowerCase().trim() === tag,
+      (t) => t.trailTitle?.toLowerCase().trim() === tag
     );
 
     if (matchingTrail && matchingTrail.time) {
       return total + parseFloat(matchingTrail.time);
     }
+
     return total;
   }, 0);
 
@@ -111,20 +123,20 @@ function Dashboard() {
     <div className="dashboard-container">
       <header className="dashboard-header">
         {user ? (
-         <>
-          <h1>Welcome {user.username}</h1>
-          <div style={{ display: "flex", gap: "10px" }}>
-            <button
-              className="login-button"
-              onClick={() => navigate("/profile")}
-            >
-              Profile
-            </button>
-            <button className="logout-button" onClick={logout}>
-              Logout
-            </button>
-          </div>
-        </>
+          <>
+            <h1>Welcome {user.username}</h1>
+            <div className="dashboard-header-actions">
+              <button
+                className="login-button"
+                onClick={() => navigate("/profile")}
+              >
+                Profile
+              </button>
+              <button className="logout-button" onClick={logout}>
+                Logout
+              </button>
+            </div>
+          </>
         ) : (
           <>
             <h1>Welcome to TrailTracker</h1>
@@ -160,9 +172,6 @@ function Dashboard() {
               <div
                 key={trail._id || trail.id}
                 className="trail-card"
-                /* IMPORTANT: Ensure this route matches your App.js. 
-                   If you want to see the POST details, use the route for single posts.
-                */
                 onClick={() => navigate(`/trail/${trail._id || trail.id}`)}
               >
                 {trail.imgUrl && trail.imgUrl.trim() !== "" ? (
@@ -170,6 +179,7 @@ function Dashboard() {
                 ) : (
                   <div className="no-image-container">No Image</div>
                 )}
+
                 <div className="trail-info">
                   <h3>{trail.title}</h3>
                 </div>
@@ -179,7 +189,6 @@ function Dashboard() {
         )}
       </div>
 
-      {/* --- MY TRAIL MOMENT SECTION --- */}
       <div className="moments-section my-moments">
         {!user ? (
           <>
@@ -224,6 +233,7 @@ function Dashboard() {
                 Create post
               </button>
             </div>
+
             <div className="trails-grid">
               {myTrails.map((trail) => (
                 <div
@@ -236,8 +246,15 @@ function Dashboard() {
                   ) : (
                     <div className="no-image-container">No Image</div>
                   )}
+
                   <div className="trail-info">
                     <h3>{trail.title}</h3>
+
+                    {trail.moderationStatus === "under_investigation" && (
+                      <p className="trail-investigation-tag">
+                        Under Investigation
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}
@@ -287,7 +304,9 @@ function Dashboard() {
           >
             Difficulty
             <span
-              className={`dropdown-arrow ${isDifficultyDropdownOpen ? "open" : ""}`}
+              className={`dropdown-arrow ${
+                isDifficultyDropdownOpen ? "open" : ""
+              }`}
             >
               &#9662;
             </span>
@@ -361,7 +380,7 @@ function Dashboard() {
                 }}
                 onCloseClick={() => setSelectedTrail(null)}
               >
-                <div style={{ color: "black" }}>
+                <div className="map-info-window">
                   <h3>{selectedTrail.trailTitle}</h3>
                   <p>Difficulty: {selectedTrail.difficulty}</p>
                   <p>Region: {selectedTrail.region}</p>
@@ -385,7 +404,9 @@ function Dashboard() {
             >
               {showOnlyWithPosts ? "Trails With Posts" : "All Trails"}
               <span
-                className={`dropdown-arrow ${isPostFilterDropdownOpen ? "open" : ""}`}
+                className={`dropdown-arrow ${
+                  isPostFilterDropdownOpen ? "open" : ""
+                }`}
               >
                 &#9662;
               </span>
@@ -400,9 +421,7 @@ function Dashboard() {
                     checked={!showOnlyWithPosts}
                     onChange={() => {
                       setShowOnlyWithPosts(false);
-                      setIsPostFilterDropdownOpen(
-                        false,
-                      ); /* Closes menu on click */
+                      setIsPostFilterDropdownOpen(false);
                     }}
                   />
                   All Trails
@@ -415,9 +434,7 @@ function Dashboard() {
                     checked={showOnlyWithPosts}
                     onChange={() => {
                       setShowOnlyWithPosts(true);
-                      setIsPostFilterDropdownOpen(
-                        false,
-                      ); /* Closes menu on click */
+                      setIsPostFilterDropdownOpen(false);
                     }}
                   />
                   Only Trails With Posts
