@@ -9,6 +9,7 @@ import {
   useJsApiLoader,
 } from "@react-google-maps/api";
 import { dataSet } from "./assets/dataSet";
+import heroBg from "./assets/background-image.jpg";
 
 function Dashboard() {
   const [trails, setTrails] = useState([]);
@@ -18,9 +19,15 @@ function Dashboard() {
     useState(false);
   const [isPostFilterDropdownOpen, setIsPostFilterDropdownOpen] =
     useState(false);
+  const [isDogFriendlyDropdownOpen, setIsDogFriendlyDropdownOpen] =
+    useState(false);
+  const [dogFriendlyFilter, setDogFriendlyFilter] = useState("all");
+  const [isDistanceDropdownOpen, setIsDistanceDropdownOpen] = useState(false);
+  const [minDistance, setMinDistance] = useState(0);
+  const [maxDistance, setMaxDistance] = useState(30);
 
   const navigate = useNavigate();
-  const { user, logout } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
 
   const containerStyle = {
     width: "100%",
@@ -83,14 +90,6 @@ function Dashboard() {
     setSearchResults(filtered.slice(0, 5));
   }
 
-  const myTrails = user
-    ? trails.filter((trail) => {
-        const postUserId = trail.user?._id || trail.user;
-        const loggedInUserId = user?.id || user?._id;
-        return postUserId === loggedInUserId;
-      })
-    : [];
-
   const otherTrails = user
     ? trails.filter((trail) => {
         const postUserId = trail.user?._id || trail.user;
@@ -99,47 +98,26 @@ function Dashboard() {
       })
     : trails.filter((trail) => !isTrailFlagged(trail));
 
-  const uniqueTrails = [
-    ...new Set(
-      myTrails.map((post) => post.tag?.toLowerCase().trim()).filter(Boolean)
-    ),
-  ];
-
-  const trailsVisitedCount = uniqueTrails.length;
-
-  const totalHoursHiked = uniqueTrails.reduce((total, tag) => {
-    const matchingTrail = dataSet.find(
-      (t) => t.trailTitle?.toLowerCase().trim() === tag
-    );
-
-    if (matchingTrail && matchingTrail.time) {
-      return total + parseFloat(matchingTrail.time);
-    }
-
-    return total;
-  }, 0);
-
   return (
     <div className="dashboard-container">
-      <header className="dashboard-header">
-        {user ? (
-          <>
-            <h1>Welcome {user.username}</h1>
-            <div className="dashboard-header-actions">
-              <button
-                className="login-button"
-                onClick={() => navigate("/profile")}
-              >
-                Profile
-              </button>
-              <button className="logout-button" onClick={logout}>
-                Logout
-              </button>
+      {/* ── Hero Section ── */}
+      <div
+        className="hero-section"
+        style={{ backgroundImage: `url(${heroBg})` }}
+      >
+        <div className="hero-overlay" />
+
+        <nav className="hero-nav">
+          <span className="hero-logo">TrailTracker</span>
+          {user ? (
+            <div
+              className="profile-avatar"
+              onClick={() => navigate("/profile")}
+              title="View Profile"
+            >
+              {user.username.charAt(0).toUpperCase()}
             </div>
-          </>
-        ) : (
-          <>
-            <h1>Welcome to TrailTracker</h1>
+          ) : (
             <div className="header-buttons">
               <button
                 className="button-outline"
@@ -154,40 +132,27 @@ function Dashboard() {
                 Sign Up
               </button>
             </div>
-          </>
-        )}
-      </header>
+          )}
+        </nav>
 
-      <div className="moments-section other-moments">
-        <h2>Check Out Other Moment</h2>
-        {otherTrails.length === 0 ? (
-          <div className="empty-state">
-            <p>
-              <strong>No moments shared by others yet.</strong>
-            </p>
-          </div>
-        ) : (
-          <div className="trails-grid">
-            {otherTrails.map((trail) => (
-              <div
-                key={trail._id || trail.id}
-                className="trail-card"
-                onClick={() => navigate(`/trail/${trail._id || trail.id}`)}
-              >
-                {trail.imgUrl && trail.imgUrl.trim() !== "" ? (
-                  <img src={trail.imgUrl} alt={trail.title} />
-                ) : (
-                  <div className="no-image-container">No Image</div>
-                )}
+        <div className="hero-content">
+          <h1 className="hero-title">
+            {user
+              ? `Welcome back, ${user.username}`
+              : "Welcome to TrailTracker"}
+          </h1>
 
-                <div className="trail-info">
-                  <h3>{trail.title}</h3>
-                </div>
+          <div className="hero-search-wrapper">
+            <div className="search-bar-wrapper">
+              <div className="search-input-container">
+                <input
+                  type="text"
+                  placeholder="Search by city, park, or trail name"
+                  value={searchQuery}
+                  onChange={handleSearch}
+                  className="trail-search-input"
+                />
               </div>
-            ))}
-          </div>
-        )}
-      </div>
 
       <div className="moments-section my-moments">
         {!user ? (
@@ -263,85 +228,231 @@ function Dashboard() {
         )}
       </div>
 
-      <div className="statistics-section">
-        <h2>My Statistics</h2>
-        {!user ? (
-          <div className="empty-state">
-            <p>
-              <strong>You must login to view your statistics</strong>
-            </p>
-            <button className="login-button" onClick={() => navigate("/login")}>
-              Login
-            </button>
+                {isPostFilterDropdownOpen && (
+                  <div className="search-filter-dropdown">
+                    <label className="dropdown-item">
+                      <input
+                        type="radio"
+                        name="postFilter"
+                        checked={!showOnlyWithPosts}
+                        onChange={() => {
+                          setShowOnlyWithPosts(false);
+                          setIsPostFilterDropdownOpen(false);
+                        }}
+                      />
+                      All Trails
+                    </label>
+                    <label className="dropdown-item">
+                      <input
+                        type="radio"
+                        name="postFilter"
+                        checked={showOnlyWithPosts}
+                        onChange={() => {
+                          setShowOnlyWithPosts(true);
+                          setIsPostFilterDropdownOpen(false);
+                        }}
+                      />
+                      Only With Posts
+                    </label>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {searchResults.length > 0 && (
+              <div className="search-dropdown">
+                {searchResults.map((trail) => (
+                  <div
+                    key={trail.id}
+                    className="search-result-item"
+                    onClick={() => navigate(`/trail-result/${trail.id}`)}
+                  >
+                    {trail.trailTitle}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="stats-grid">
-            <div className="stat-item">
-              <span className="stat-number">{trailsVisitedCount}</span>
-              <span className="stat-label">Trail visited</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-number">{myTrails.length}</span>
-              <span className="stat-label">Trail Moments</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-number">{totalHoursHiked}</span>
-              <span className="stat-label">Hours Hiked</span>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
 
       <div className="map-section">
-        <h2>Trail Map</h2>
+        <div className="map-section-header">
+          <h2>Explore Trail</h2>
 
-        <div className="filter-dropdown-container">
-          <button
-            className="dropdown-toggle-button"
-            onClick={() =>
-              setIsDifficultyDropdownOpen(!isDifficultyDropdownOpen)
-            }
-          >
-            Difficulty
-            <span
-              className={`dropdown-arrow ${
-                isDifficultyDropdownOpen ? "open" : ""
-              }`}
-            >
-              &#9662;
-            </span>
-          </button>
+          <div className="filter-group">
+            <div className="filter-dropdown-container">
+              <button
+                className="dropdown-toggle-button"
+                onClick={() => {
+                  setIsDistanceDropdownOpen(!isDistanceDropdownOpen);
+                  setIsDogFriendlyDropdownOpen(false);
+                  setIsDifficultyDropdownOpen(false);
+                }}
+              >
+                Distance
+                <span
+                  className={`dropdown-arrow ${isDistanceDropdownOpen ? "open" : ""}`}
+                >
+                  &#9662;
+                </span>
+              </button>
 
-          {isDifficultyDropdownOpen && (
-            <div className="dropdown-menu">
-              <label className="dropdown-item">
-                <input
-                  type="checkbox"
-                  checked={showEasy}
-                  onChange={() => setShowEasy(!showEasy)}
-                />
-                Easy
-              </label>
-
-              <label className="dropdown-item">
-                <input
-                  type="checkbox"
-                  checked={showIntermediate}
-                  onChange={() => setShowIntermediate(!showIntermediate)}
-                />
-                Intermediate
-              </label>
-
-              <label className="dropdown-item">
-                <input
-                  type="checkbox"
-                  checked={showDifficult}
-                  onChange={() => setShowDifficult(!showDifficult)}
-                />
-                Difficult
-              </label>
+              {isDistanceDropdownOpen && (
+                <div className="dropdown-menu distance-dropdown-menu">
+                  <div className="distance-range-label">
+                    {minDistance === 0 && maxDistance === 30
+                      ? "Any"
+                      : `${minDistance}–${maxDistance} km`}
+                  </div>
+                  <div className="dual-range-wrapper">
+                    <div className="dual-range-track">
+                      <div
+                        className="dual-range-fill"
+                        style={{
+                          left: `${(minDistance / 30) * 100}%`,
+                          right: `${((30 - maxDistance) / 30) * 100}%`,
+                        }}
+                      />
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="30"
+                      value={minDistance}
+                      onChange={(e) => {
+                        const v = parseInt(e.target.value);
+                        if (v <= maxDistance) setMinDistance(v);
+                      }}
+                      className="dual-range-input"
+                    />
+                    <input
+                      type="range"
+                      min="0"
+                      max="30"
+                      value={maxDistance}
+                      onChange={(e) => {
+                        const v = parseInt(e.target.value);
+                        if (v >= minDistance) setMaxDistance(v);
+                      }}
+                      className="dual-range-input"
+                    />
+                  </div>
+                  <div className="dual-range-endpoints">
+                    <span>0 km</span>
+                    <span>30 km+</span>
+                  </div>
+                  {(minDistance > 0 || maxDistance < 30) && (
+                    <button
+                      className="distance-clear-button"
+                      onClick={() => {
+                        setMinDistance(0);
+                        setMaxDistance(30);
+                      }}
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
-          )}
+
+            <div className="filter-dropdown-container">
+              <button
+                className="dropdown-toggle-button"
+                onClick={() => {
+                  setIsDogFriendlyDropdownOpen(!isDogFriendlyDropdownOpen);
+                  setIsDistanceDropdownOpen(false);
+                  setIsDifficultyDropdownOpen(false);
+                }}
+              >
+                Dog Friendly
+                <span
+                  className={`dropdown-arrow ${isDogFriendlyDropdownOpen ? "open" : ""}`}
+                >
+                  &#9662;
+                </span>
+              </button>
+
+              {isDogFriendlyDropdownOpen && (
+                <div className="dropdown-menu">
+                  <label className="dropdown-item">
+                    <input
+                      type="radio"
+                      name="dogFilter"
+                      checked={dogFriendlyFilter === "yes"}
+                      onChange={() => {
+                        setDogFriendlyFilter("yes");
+                        setIsDogFriendlyDropdownOpen(false);
+                      }}
+                    />
+                    Yes
+                  </label>
+                  <label className="dropdown-item">
+                    <input
+                      type="radio"
+                      name="dogFilter"
+                      checked={dogFriendlyFilter === "no"}
+                      onChange={() => {
+                        setDogFriendlyFilter("no");
+                        setIsDogFriendlyDropdownOpen(false);
+                      }}
+                    />
+                    No
+                  </label>
+                </div>
+              )}
+            </div>
+
+            <div className="filter-dropdown-container">
+              <button
+                className="dropdown-toggle-button"
+                onClick={() => {
+                  setIsDifficultyDropdownOpen(!isDifficultyDropdownOpen);
+                  setIsDistanceDropdownOpen(false);
+                  setIsDogFriendlyDropdownOpen(false);
+                }}
+              >
+                Difficulty
+                <span
+                  className={`dropdown-arrow ${isDifficultyDropdownOpen ? "open" : ""}`}
+                >
+                  &#9662;
+                </span>
+              </button>
+
+              {isDifficultyDropdownOpen && (
+                <div className="dropdown-menu">
+                  <label className="dropdown-item">
+                    <input
+                      type="checkbox"
+                      checked={showEasy}
+                      onChange={() => setShowEasy(!showEasy)}
+                    />
+                    Easy
+                  </label>
+
+                  <label className="dropdown-item">
+                    <input
+                      type="checkbox"
+                      checked={showIntermediate}
+                      onChange={() => setShowIntermediate(!showIntermediate)}
+                    />
+                    Intermediate
+                  </label>
+
+                  <label className="dropdown-item">
+                    <input
+                      type="checkbox"
+                      checked={showDifficult}
+                      onChange={() => setShowDifficult(!showDifficult)}
+                    />
+                    Difficult
+                  </label>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {isLoaded && (
@@ -360,6 +471,15 @@ function Dashboard() {
                 if (trail.difficulty === "Intermediate" && !showIntermediate)
                   return false;
                 if (trail.difficulty === "Difficult" && !showDifficult)
+                  return false;
+                if (dogFriendlyFilter === "yes" && !trail.dogFriendly)
+                  return false;
+                if (dogFriendlyFilter === "no" && trail.dogFriendly)
+                  return false;
+                if (
+                  trail.tripTime < minDistance ||
+                  trail.tripTime > maxDistance
+                )
                   return false;
                 return true;
               })
@@ -391,82 +511,37 @@ function Dashboard() {
         )}
       </div>
 
-      <div className="search-selection">
-        <div className="search-header-row">
-          <h2>Trail Search</h2>
-
-          <div className="filter-dropdown-container">
-            <button
-              className="dropdown-toggle-button"
-              onClick={() =>
-                setIsPostFilterDropdownOpen(!isPostFilterDropdownOpen)
-              }
-            >
-              {showOnlyWithPosts ? "Trails With Posts" : "All Trails"}
-              <span
-                className={`dropdown-arrow ${
-                  isPostFilterDropdownOpen ? "open" : ""
-                }`}
-              >
-                &#9662;
-              </span>
-            </button>
-
-            {isPostFilterDropdownOpen && (
-              <div className="dropdown-menu">
-                <label className="dropdown-item">
-                  <input
-                    type="radio"
-                    name="postFilter"
-                    checked={!showOnlyWithPosts}
-                    onChange={() => {
-                      setShowOnlyWithPosts(false);
-                      setIsPostFilterDropdownOpen(false);
-                    }}
-                  />
-                  All Trails
-                </label>
-
-                <label className="dropdown-item">
-                  <input
-                    type="radio"
-                    name="postFilter"
-                    checked={showOnlyWithPosts}
-                    onChange={() => {
-                      setShowOnlyWithPosts(true);
-                      setIsPostFilterDropdownOpen(false);
-                    }}
-                  />
-                  Only Trails With Posts
-                </label>
-              </div>
-            )}
+      <div className="moments-section other-moments">
+        <h2>Top Hiking Moment</h2>
+        {otherTrails.length === 0 ? (
+          <div className="empty-state">
+            <p>
+              <strong>No moments shared by others yet.</strong>
+            </p>
           </div>
-        </div>
-
-        <div className="search-input-container">
-          <input
-            type="text"
-            placeholder="Search trails..."
-            value={searchQuery}
-            onChange={handleSearch}
-            className="trail-search-input"
-          />
-
-          {searchResults.length > 0 && (
-            <div className="search-dropdown">
-              {searchResults.map((trail) => (
-                <div
-                  key={trail.id}
-                  className="search-result-item"
-                  onClick={() => navigate(`/trail-result/${trail.id}`)}
-                >
-                  {trail.trailTitle}
+        ) : (
+          <div className="trails-grid trails-grid-4col">
+            {otherTrails.slice(0, 8).map((trail) => (
+              <div
+                key={trail._id || trail.id}
+                className="trail-card"
+                /* IMPORTANT: Ensure this route matches your App.js.
+                   If you want to see the POST details, use the route for single posts.
+                */
+                onClick={() => navigate(`/trail/${trail._id || trail.id}`)}
+              >
+                {trail.imgUrl && trail.imgUrl.trim() !== "" ? (
+                  <img src={trail.imgUrl} alt={trail.title} />
+                ) : (
+                  <div className="no-image-container">No Image</div>
+                )}
+                <div className="trail-info">
+                  <h3>{trail.title}</h3>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="bottom-buffer"></div>

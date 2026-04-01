@@ -19,7 +19,9 @@ router.delete("/me", auth, async (req, res) => {
     await Trail.deleteMany({ user: userId });
     await User.findByIdAndDelete(userId);
 
-    res.json({ message: "Your account and related trails were deleted successfully" });
+    res.json({
+      message: "Your account and related trails were deleted successfully",
+    });
   } catch (err) {
     console.error("DELETE /api/users/me error:", err.message);
     res.status(500).json({ error: "Failed to delete account" });
@@ -38,52 +40,65 @@ router.get("/admin/users", auth, authorizeRole("admin"), async (req, res) => {
 });
 
 // Admin-only: delete any user by id
-router.delete("/admin/users/:id", auth, authorizeRole("admin"), async (req, res) => {
-  try {
-    const targetUserId = req.params.id;
+router.delete(
+  "/admin/users/:id",
+  auth,
+  authorizeRole("admin"),
+  async (req, res) => {
+    try {
+      const targetUserId = req.params.id;
 
-    const existingUser = await User.findById(targetUserId);
-    if (!existingUser) {
-      return res.status(404).json({ error: "User not found" });
+      const existingUser = await User.findById(targetUserId);
+      if (!existingUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      await Trail.deleteMany({ user: targetUserId });
+      await User.findByIdAndDelete(targetUserId);
+
+      res.json({ message: "User and related trails deleted successfully" });
+    } catch (err) {
+      console.error("DELETE /api/users/admin/users/:id error:", err.message);
+      res.status(500).json({ error: "Failed to delete user" });
     }
-
-    await Trail.deleteMany({ user: targetUserId });
-    await User.findByIdAndDelete(targetUserId);
-
-    res.json({ message: "User and related trails deleted successfully" });
-  } catch (err) {
-    console.error("DELETE /api/users/admin/users/:id error:", err.message);
-    res.status(500).json({ error: "Failed to delete user" });
-  }
-});
+  },
+);
 
 // Admin-only: update a user's role
-router.patch("/admin/users/:id/role", auth, authorizeRole("admin"), async (req, res) => {
-  try {
-    const { role } = req.body;
+router.patch(
+  "/admin/users/:id/role",
+  auth,
+  authorizeRole("admin"),
+  async (req, res) => {
+    try {
+      const { role } = req.body;
 
-    if (!["user", "admin"].includes(role)) {
-      return res.status(400).json({ error: "Invalid role" });
+      if (!["user", "admin"].includes(role)) {
+        return res.status(400).json({ error: "Invalid role" });
+      }
+
+      const updatedUser = await User.findByIdAndUpdate(
+        req.params.id,
+        { role },
+        { new: true, runValidators: true },
+      ).select("-password");
+
+      if (!updatedUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      res.json({
+        message: "User role updated successfully",
+        user: updatedUser,
+      });
+    } catch (err) {
+      console.error(
+        "PATCH /api/users/admin/users/:id/role error:",
+        err.message,
+      );
+      res.status(500).json({ error: "Failed to update user role" });
     }
-
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      { role },
-      { new: true, runValidators: true }
-    ).select("-password");
-
-    if (!updatedUser) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    res.json({
-      message: "User role updated successfully",
-      user: updatedUser,
-    });
-  } catch (err) {
-    console.error("PATCH /api/users/admin/users/:id/role error:", err.message);
-    res.status(500).json({ error: "Failed to update user role" });
-  }
-});
+  },
+);
 
 module.exports = router;

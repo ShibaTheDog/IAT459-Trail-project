@@ -23,7 +23,6 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
           {/* <Route
             path="/dashboard"
             element={
@@ -32,16 +31,13 @@ function App() {
               </ProtectedRoute>
             }
           /> */}
-
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/trail/:id" element={<TrailDetail />} />
           <Route path="/trail-result/:id" element={<TrailResult />} />
-          <Route path="/profile" element={<Profile />} />  {/* probably needs to be protected or something*/}
-          
-          
-
+          <Route path="/profile" element={<Profile />} />{" "}
+          {/* probably needs to be protected or something*/}
           <Route
             path="/create-post"
             element={

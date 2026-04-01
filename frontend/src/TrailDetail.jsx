@@ -36,7 +36,7 @@ function TrailDetail() {
 
   async function handleDelete() {
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this trail post?"
+      "Are you sure you want to delete this trail post?",
     );
 
     if (!confirmDelete) return;
@@ -99,7 +99,7 @@ function TrailDetail() {
             reason: reportReason,
             message: reportMessage,
           }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -156,6 +156,7 @@ function TrailDetail() {
       </div>
 
       <div className="trail-detail-container">
+        {!isOwner && user && <button className="report-button">Report</button>}
         <div className="trail-detail-image-section">
           {trail.imgUrl ? (
             <img
@@ -164,7 +165,7 @@ function TrailDetail() {
               className="trail-detail-image"
             />
           ) : (
-            <div className="no-image-container">No image available</div>
+            <div className="no-image-placeholder">No Image Available</div>
           )}
         </div>
 
@@ -216,10 +217,7 @@ function TrailDetail() {
 
       {showReportModal && (
         <div className="report-modal-overlay" onClick={closeReportModal}>
-          <div
-            className="report-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="report-modal" onClick={(e) => e.stopPropagation()}>
             <div className="report-modal-header">
               <h2>Report Post</h2>
               <button
@@ -261,7 +259,9 @@ function TrailDetail() {
                 />
               </div>
 
-              {reportError && <p className="form-message error">{reportError}</p>}
+              {reportError && (
+                <p className="form-message error">{reportError}</p>
+              )}
 
               <div className="report-modal-actions">
                 <button
