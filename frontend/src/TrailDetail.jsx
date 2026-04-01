@@ -90,12 +90,19 @@ function TrailDetail() {
       </div>
 
       <div className="trail-detail-container">
+        {!isOwner && user && (
+          <button className="report-button">Report</button>
+        )}
         <div className="trail-detail-image-section">
-          <img
-            src={trail.imgUrl}
-            alt={trail.title}
-            className="trail-detail-image"
-          />
+          {trail.imgUrl ? (
+            <img
+              src={trail.imgUrl}
+              alt={trail.title}
+              className="trail-detail-image"
+            />
+          ) : (
+            <div className="no-image-placeholder">No Image</div>
+          )}
         </div>
 
         <div className="trail-detail-info-section">
