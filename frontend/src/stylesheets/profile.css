@@ -56,6 +56,21 @@
   background-color: #a03d3d;
 }
 
+.btn-admin {
+  background-color: #4a7c59;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-admin:hover {
+  background-color: #3a6347;
+}
+
 .btn-delete-account {
   background-color: transparent;
   color: #b64e4e;
@@ -100,6 +115,14 @@
   margin-bottom: 20px;
 }
 
+.profile-role-badge {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: #888;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
 .profile-stats {
   display: flex;
   gap: 40px;
@@ -142,8 +165,8 @@
 }
 
 .empty-state {
-  background-color: #d9d9d9;
-  border: 1px solid #999;
+  background-color: #a7de83;
+  border: 1px solid #8cc96a;
   border-radius: 8px;
   padding: 50px 20px;
   text-align: center;

@@ -88,13 +88,12 @@ function TrailForm() {
 
   return (
     <div className="dashboard-container">
-      <header className="dashboard-header">
-        <h1>Share Your Trail Moment</h1>
+      <header className="dashboard-header-1">
         <button
-          className="logout-button"
+          className="profile-back-button"
           onClick={() => navigate("/dashboard")}
         >
-          Back to Dashboard
+          &#8592; Back
         </button>
       </header>
 
@@ -153,15 +152,16 @@ function TrailForm() {
           </div>
 
           <div className="input-group">
-            <label>Select Trail Tag</label>
-            <div>
+            <label>Select Trail</label>
+            <div style={{ position: "relative" }}>
               <input
                 type="text"
-                placeholder="Search trails..."
+                placeholder="Search for a trail you hiked..."
                 value={searchQuery}
                 onChange={handleSearch}
                 className="trail-search-input"
                 disabled={!user}
+                style={{ border: "1px solid #999", borderRadius: "6px" }}
               />
               {searchResults.length > 0 && (
                 <div className="search-dropdown">
@@ -177,11 +177,6 @@ function TrailForm() {
                 </div>
               )}
             </div>
-          </div>
-
-          <div className="input-group">
-            <label>Selected Trail</label>
-            <input value={formData.tag || "N/A"} disabled />
           </div>
 
           <button type="submit" className="submit-button" disabled={!user}>

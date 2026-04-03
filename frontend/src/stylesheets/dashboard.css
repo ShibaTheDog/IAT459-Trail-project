@@ -89,6 +89,26 @@
   gap: 10px;
 }
 
+.dashboard-header-1 {
+  margin-top: 2.2rem;
+  margin-bottom: 3rem;
+}
+
+.profile-back-button {
+  background-color: transparent;
+  color: #555;
+  border: 1px solid #999;
+  padding: 8px 16px;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.profile-back-button:hover {
+  background-color: #d9d9d9;
+  color: #000;
+}
+
 .logout-button {
   background-color: #b64e4e;
   color: white;
@@ -257,6 +277,11 @@
   background-color: #a5c7a1;
 }
 
+.moments-section {
+  width: 100%;
+  margin-top: 50px;
+}
+
 .moments-section h2 {
   font-size: 1.6rem;
   margin-bottom: 20px;
@@ -265,8 +290,8 @@
 }
 
 .empty-state {
-  background-color: #d9d9d9;
-  border: 1px solid #999;
+  background-color: #a7de83;
+  border: 1px solid #8cc96a;
   border-radius: 8px;
   padding: 50px 20px;
   text-align: center;
@@ -280,7 +305,7 @@
 }
 
 .trails-grid-4col {
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, 1fr) !important;
 }
 
 .trail-card {
@@ -417,12 +442,13 @@
   padding: 0.75rem 1.2rem;
   background: #f0f0f0;
   border: none;
-  border-radius: 10px;
+  border-left: 1px solid #ddd;
+  border-radius: 0 12px 12px 0;
   font-size: 1rem;
   cursor: pointer;
   white-space: nowrap;
-  margin-bottom: -0.25rem;
-  margin-left: 0.5rem;
+  margin-left: -5.4rem;
+  margin-top: 0.35rem;
 }
 
 .search-filter-button:hover {

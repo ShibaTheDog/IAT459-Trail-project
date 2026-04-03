@@ -9,6 +9,7 @@ function TrailDetail() {
   const [pageError, setPageError] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
+  const [showDotsMenu, setShowDotsMenu] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState("offensive");
   const [reportMessage, setReportMessage] = useState("");
@@ -33,6 +34,34 @@ function TrailDetail() {
         setPageError("Could not load the trail details. Please try again.");
       });
   }, [id]);
+
+  async function handleAdminDelete() {
+    const confirmDelete = window.confirm(
+      "Admin: Are you sure you want to delete this post?",
+    );
+    if (!confirmDelete) return;
+
+    try {
+      setDeleteLoading(true);
+      const response = await fetch(
+        `http://localhost:5000/api/trails/admin/${id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to delete trail");
+      }
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("Admin delete error:", err);
+      alert(err.message);
+    } finally {
+      setDeleteLoading(false);
+    }
+  }
 
   async function handleDelete() {
     const confirmDelete = window.confirm(
@@ -68,6 +97,7 @@ function TrailDetail() {
   }
 
   function openReportModal() {
+    setShowDotsMenu(false);
     setReportError("");
     setReportSuccess("");
     setShowReportModal(true);
@@ -156,7 +186,44 @@ function TrailDetail() {
       </div>
 
       <div className="trail-detail-container">
-        {!isOwner && user && <button className="report-button">Report</button>}
+        {user && !isOwner && (
+          <>
+            <button
+              className="dots-menu-button"
+              onClick={() => setShowDotsMenu(true)}
+              aria-label="More options"
+            >
+              <span /><span /><span />
+            </button>
+
+            {showDotsMenu && (
+              <div className="dots-menu-overlay" onClick={() => setShowDotsMenu(false)}>
+                <div className="dots-menu-sheet" onClick={(e) => e.stopPropagation()}>
+                  <button className="dots-menu-option report" onClick={openReportModal}>
+                    Report
+                  </button>
+                  {user?.role === "admin" && (
+                    <>
+                      <div className="dots-menu-divider" />
+                      <button
+                        className="dots-menu-option report"
+                        onClick={handleAdminDelete}
+                        disabled={deleteLoading}
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
+                  <div className="dots-menu-divider" />
+                  <button className="dots-menu-option cancel" onClick={() => setShowDotsMenu(false)}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
         <div className="trail-detail-image-section">
           {trail.imgUrl ? (
             <img
@@ -170,6 +237,13 @@ function TrailDetail() {
         </div>
 
         <div className="trail-detail-info-section">
+          <div className="post-author-header">
+            <div className="post-author-avatar">
+              {trail.user?.username?.charAt(0).toUpperCase() ?? "?"}
+            </div>
+            <span className="post-author-name">{trail.user?.username ?? "Unknown"}</span>
+          </div>
+
           <div className="trail-title-row">
             <h1 className="trail-detail-title">{trail.title}</h1>
 
@@ -187,18 +261,6 @@ function TrailDetail() {
           {reportError && <p className="form-message error">{reportError}</p>}
           {reportSuccess && (
             <p className="form-message success">{reportSuccess}</p>
-          )}
-
-          {user && !isOwner && (
-            <div className="trail-report-container">
-              <button
-                onClick={openReportModal}
-                className="trail-report-button"
-                type="button"
-              >
-                Report Post
-              </button>
-            </div>
           )}
 
           {isOwner && (

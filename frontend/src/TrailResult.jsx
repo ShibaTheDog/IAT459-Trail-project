@@ -22,8 +22,8 @@ function TrailResult() {
     return (
       <div className="dashboard-container">
         <h2>Trail Not Found</h2>
-        <button className="login-button" onClick={() => navigate("/dashboard")}>
-          Back to Dashboard
+        <button className="profile-back-button" onClick={() => navigate("/dashboard")}>
+          &#8592; Back
         </button>
       </div>
     );
@@ -39,8 +39,8 @@ function TrailResult() {
   return (
     <div className="dashboard-page">
       <div className="back-button-container">
-        <button onClick={() => navigate(-1)} className="logout-button">
-          ← Back
+        <button onClick={() => navigate(-1)} className="profile-back-button">
+          &#8592; Back
         </button>
       </div>
 
