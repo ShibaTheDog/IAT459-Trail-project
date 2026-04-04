@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 
-function auth(req, res, next) {
+async function auth(req, res, next) {
   try {
     const authHeader = req.header("Authorization");
 
@@ -18,11 +19,37 @@ function auth(req, res, next) {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+    const currentUser = await User.findById(decoded.id).select(
+      "_id username email role suspended suspendedAt suspendedUntil"
+    );
+
+    if (!currentUser) {
+      return res.status(401).json({ error: "User no longer exists" });
+    }
+
+    if (currentUser.suspended) {
+      const now = new Date();
+
+      if (currentUser.suspendedUntil && currentUser.suspendedUntil <= now) {
+        currentUser.suspended = false;
+        currentUser.suspendedAt = null;
+        currentUser.suspendedUntil = null;
+        await currentUser.save();
+      } else {
+        return res.status(403).json({
+          error: "Account is suspended",
+          suspendedUntil: currentUser.suspendedUntil,
+        });
+      }
+    }
+
     req.user = {
-      id: decoded.id,
-      username: decoded.username,
-      email: decoded.email,
-      role: decoded.role || "user",
+      id: currentUser._id.toString(),
+      username: currentUser.username,
+      email: currentUser.email,
+      role: currentUser.role || "user",
+      suspended: currentUser.suspended,
+      suspendedUntil: currentUser.suspendedUntil,
     };
 
     next();

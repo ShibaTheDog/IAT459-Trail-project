@@ -7,57 +7,319 @@ function AdminModeration() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const [activeTab, setActiveTab] = useState("posts");
+
   const [reportedTrails, setReportedTrails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [deleteLoadingId, setDeleteLoadingId] = useState(null);
+  const [resolveLoadingId, setResolveLoadingId] = useState(null);
+
+  const [usersList, setUsersList] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersError, setUsersError] = useState("");
+  const [userSearch, setUserSearch] = useState("");
+  const [userPage, setUserPage] = useState(1);
+  const [userPagination, setUserPagination] = useState({
+    page: 1,
+    totalPages: 1,
+    totalUsers: 0,
+    limit: 20,
+  });
+  const [deleteUserLoadingId, setDeleteUserLoadingId] = useState(null);
+  const [suspendUserLoadingId, setSuspendUserLoadingId] = useState(null);
+
+  const [showSuspendModal, setShowSuspendModal] = useState(false);
+  const [selectedUserForSuspension, setSelectedUserForSuspension] =
+    useState(null);
+  const [suspensionDays, setSuspensionDays] = useState("7");
+  const [suspensionModalError, setSuspensionModalError] = useState("");
 
   useEffect(() => {
-    async function fetchReportedTrails() {
-      try {
-        const token = localStorage.getItem("token");
-        const res = await fetch(
-          "http://localhost:5000/api/trails/admin/reported",
-          { headers: { Authorization: `Bearer ${token}` } },
-        );
-        const data = await res.json();
-        if (!res.ok)
-          throw new Error(data.error || "Failed to load reported trails");
-        setReportedTrails(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchReportedTrails();
   }, []);
 
+  useEffect(() => {
+    if (activeTab === "users") {
+      fetchUsers();
+    }
+  }, [activeTab, userSearch, userPage]);
+
+  async function fetchReportedTrails() {
+    try {
+      setLoading(true);
+      setError("");
+
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:5000/api/trails/admin/reported", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to load reported trails");
+      }
+
+      setReportedTrails(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setError(err.message);
+      setReportedTrails([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function fetchUsers() {
+    try {
+      setUsersLoading(true);
+      setUsersError("");
+
+      const token = localStorage.getItem("token");
+      const params = new URLSearchParams({
+        search: userSearch,
+        page: String(userPage),
+        limit: "20",
+      });
+
+      const res = await fetch(
+        `http://localhost:5000/api/users/admin/users?${params.toString()}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to load users");
+      }
+
+      const normalizedUsers = Array.isArray(data?.users)
+        ? data.users
+        : Array.isArray(data)
+        ? data
+        : [];
+
+      const normalizedPagination = data?.pagination || {
+        page: 1,
+        totalPages: 1,
+        totalUsers: normalizedUsers.length,
+        limit: 20,
+      };
+
+      setUsersList(normalizedUsers);
+      setUserPagination(normalizedPagination);
+    } catch (err) {
+      setUsersError(err.message);
+      setUsersList([]);
+      setUserPagination({
+        page: 1,
+        totalPages: 1,
+        totalUsers: 0,
+        limit: 20,
+      });
+    } finally {
+      setUsersLoading(false);
+    }
+  }
+
   async function handleDeletePost(trailId) {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this post? This action cannot be undone.",
+      "Are you sure you want to delete this post? This action cannot be undone."
     );
     if (!confirmed) return;
 
     try {
       setDeleteLoadingId(trailId);
       const token = localStorage.getItem("token");
-      const res = await fetch(
-        `http://localhost:5000/api/trails/admin/${trailId}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+
+      const res = await fetch(`http://localhost:5000/api/trails/admin/${trailId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to delete post");
-      setReportedTrails((prev) =>
-        prev.filter((trail) => trail._id !== trailId),
-      );
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to delete post");
+      }
+
+      setReportedTrails((prev) => prev.filter((trail) => trail._id !== trailId));
     } catch (err) {
       alert(err.message);
     } finally {
       setDeleteLoadingId(null);
+    }
+  }
+
+  async function handleResolvePost(trailId) {
+    const confirmed = window.confirm(
+      "Mark this report as resolved and restore the post?"
+    );
+    if (!confirmed) return;
+
+    try {
+      setResolveLoadingId(trailId);
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(
+        `http://localhost:5000/api/trails/admin/${trailId}/resolve`,
+        {
+          method: "PATCH",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to resolve report");
+      }
+
+      setReportedTrails((prev) => prev.filter((trail) => trail._id !== trailId));
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setResolveLoadingId(null);
+    }
+  }
+
+  async function handleDeleteUser(targetUser) {
+    const confirmed = window.confirm(
+      `Delete ${targetUser.username}'s account and all their posts? This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    try {
+      setDeleteUserLoadingId(targetUser._id);
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(
+        `http://localhost:5000/api/users/admin/users/${targetUser._id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to delete user");
+      }
+
+      setUsersList((prev) => prev.filter((u) => u._id !== targetUser._id));
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setDeleteUserLoadingId(null);
+    }
+  }
+
+  function openSuspendModal(targetUser) {
+    setSelectedUserForSuspension(targetUser);
+    setSuspensionDays("7");
+    setSuspensionModalError("");
+    setShowSuspendModal(true);
+  }
+
+  function closeSuspendModal() {
+    if (suspendUserLoadingId) return;
+    setShowSuspendModal(false);
+    setSelectedUserForSuspension(null);
+    setSuspensionDays("7");
+    setSuspensionModalError("");
+  }
+
+  async function handleConfirmSuspension() {
+    if (!selectedUserForSuspension) return;
+
+    const parsedDays = Number(suspensionDays);
+
+    if (!Number.isFinite(parsedDays) || parsedDays <= 0) {
+      setSuspensionModalError("Please enter a valid number of days.");
+      return;
+    }
+
+    try {
+      setSuspendUserLoadingId(selectedUserForSuspension._id);
+      setSuspensionModalError("");
+
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(
+        `http://localhost:5000/api/users/admin/users/${selectedUserForSuspension._id}/suspension`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            suspended: true,
+            durationDays: parsedDays,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to suspend user");
+      }
+
+      setUsersList((prev) =>
+        prev.map((u) =>
+          u._id === selectedUserForSuspension._id ? { ...u, ...data.user } : u
+        )
+      );
+
+      closeSuspendModal();
+    } catch (err) {
+      setSuspensionModalError(err.message);
+    } finally {
+      setSuspendUserLoadingId(null);
+    }
+  }
+
+  async function handleUnsuspendUser(targetUser) {
+    const confirmed = window.confirm(
+      `Unsuspend ${targetUser.username}'s account?`
+    );
+    if (!confirmed) return;
+
+    try {
+      setSuspendUserLoadingId(targetUser._id);
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(
+        `http://localhost:5000/api/users/admin/users/${targetUser._id}/suspension`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            suspended: false,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to update suspension");
+      }
+
+      setUsersList((prev) =>
+        prev.map((u) => (u._id === targetUser._id ? { ...u, ...data.user } : u))
+      );
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setSuspendUserLoadingId(null);
     }
   }
 
@@ -75,114 +337,358 @@ function AdminModeration() {
         <h1 className="admin-title">Admin Moderation</h1>
       </div>
 
-      {loading && (
-        <div className="admin-loading">
-          <p>Loading reported posts…</p>
-        </div>
-      )}
+      <div className="admin-nav-tabs">
+        <button
+          className={`admin-nav-tab ${activeTab === "posts" ? "active" : ""}`}
+          onClick={() => setActiveTab("posts")}
+        >
+          Post Moderation
+        </button>
+        <button
+          className={`admin-nav-tab ${activeTab === "users" ? "active" : ""}`}
+          onClick={() => {
+            setActiveTab("users");
+            setUserPage(1);
+          }}
+        >
+          User Moderation
+        </button>
+      </div>
 
-      {error && (
-        <div className="admin-error-box">
-          <p>{error}</p>
-        </div>
-      )}
+      {activeTab === "posts" && (
+        <>
+          {loading && (
+            <div className="admin-loading">
+              <p>Loading reported posts…</p>
+            </div>
+          )}
 
-      {!loading && !error && reportedTrails.length === 0 && (
-        <div className="admin-empty-state">
-          <p>✓ No reported posts right now. Everything looks clean.</p>
-        </div>
-      )}
+          {error && (
+            <div className="admin-error-box">
+              <p>{error}</p>
+            </div>
+          )}
 
-      {!loading && !error && reportedTrails.length > 0 && (
-        <div className="admin-report-list">
-          {reportedTrails.map((trail) => (
-            <div key={trail._id} className="admin-report-card">
-              {/* Image column */}
-              <div className="admin-card-image-col">
-                {trail.imgUrl && trail.imgUrl.trim() !== "" ? (
-                  <img
-                    src={trail.imgUrl}
-                    alt={trail.title}
-                    className="admin-card-image"
-                  />
-                ) : (
-                  <div className="admin-card-no-image">No Image</div>
-                )}
-              </div>
+          {!loading && !error && reportedTrails.length === 0 && (
+            <div className="admin-empty-state">
+              <p>✓ No reported posts right now. Everything looks clean.</p>
+            </div>
+          )}
 
-              {/* Info column */}
-              <div className="admin-card-info-col">
-                <div className="admin-card-title-row">
-                  <h2 className="admin-card-title">{trail.title}</h2>
-                  <span className="admin-status-badge">
-                    {trail.moderationStatus === "under_investigation"
-                      ? "Under Investigation"
-                      : trail.moderationStatus}
-                  </span>
-                </div>
-
-                {trail.description && (
-                  <p className="admin-card-description">{trail.description}</p>
-                )}
-
-                <div className="admin-card-meta">
-                  <div className="admin-meta-item">
-                    <span className="admin-meta-label">Post Owner</span>
-                    <span className="admin-meta-value">
-                      {trail.user?.username || "Unknown"}
-                    </span>
+          {!loading && !error && reportedTrails.length > 0 && (
+            <div className="admin-report-list">
+              {reportedTrails.map((trail) => (
+                <div key={trail._id} className="admin-report-card">
+                  <div className="admin-card-image-col">
+                    {trail.imgUrl && trail.imgUrl.trim() !== "" ? (
+                      <img
+                        src={trail.imgUrl}
+                        alt={trail.title}
+                        className="admin-card-image"
+                      />
+                    ) : (
+                      <div className="admin-card-no-image">No Image</div>
+                    )}
                   </div>
-                  <div className="admin-meta-item">
-                    <span className="admin-meta-label">Total Reports</span>
-                    <span className="admin-meta-value admin-meta-count">
-                      {trail.reports?.length || 0}
-                    </span>
-                  </div>
-                </div>
 
-                {trail.reports?.length > 0 && (
-                  <div className="admin-reports-section">
-                    <div className="admin-reports-list">
-                      {trail.reports.map((report, index) => (
-                        <div key={index} className="admin-single-report">
-                          <div className="admin-report-reason-badge">
-                            {report.reason}
-                          </div>
-                          <p className="admin-report-by">
-                            Reported by{" "}
-                            <strong>
-                              {report.reportedBy?.username || "Unknown"}
-                            </strong>
-                          </p>
-                          {report.message && (
-                            <p className="admin-report-detail">
-                              "{report.message}"
-                            </p>
-                          )}
+                  <div className="admin-card-info-col">
+                    <div className="admin-card-title-row">
+                      <h2 className="admin-card-title">{trail.title}</h2>
+                      <span className="admin-status-badge">
+                        {trail.moderationStatus === "under_investigation"
+                          ? "Under Investigation"
+                          : trail.moderationStatus}
+                      </span>
+                    </div>
+
+                    {trail.description && (
+                      <p className="admin-card-description">{trail.description}</p>
+                    )}
+
+                    <div className="admin-card-meta">
+                      <div className="admin-meta-item">
+                        <span className="admin-meta-label">Post Owner</span>
+                        <span className="admin-meta-value">
+                          {trail.user?.username || "Unknown"}
+                        </span>
+                      </div>
+                      <div className="admin-meta-item">
+                        <span className="admin-meta-label">Total Reports</span>
+                        <span className="admin-meta-value admin-meta-count">
+                          {trail.reports?.length || 0}
+                        </span>
+                      </div>
+                    </div>
+
+                    {trail.reports?.length > 0 && (
+                      <div className="admin-reports-section">
+                        <div className="admin-reports-list">
+                          {trail.reports.map((report, index) => (
+                            <div key={index} className="admin-single-report">
+                              <div className="admin-report-reason-badge">
+                                {report.reason}
+                              </div>
+                              <p className="admin-report-by">
+                                Reported by{" "}
+                                <strong>
+                                  {report.reportedBy?.username || "Unknown"}
+                                </strong>
+                              </p>
+                              {report.message && (
+                                <p className="admin-report-detail">
+                                  "{report.message}"
+                                </p>
+                              )}
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                      </div>
+                    )}
+
+                    <div className="admin-card-actions">
+                      <button
+                        className="admin-view-post-button"
+                        onClick={() => navigate(`/trail/${trail._id}`)}
+                      >
+                        View
+                      </button>
+
+                      <button
+                        className="admin-resolve-post-button"
+                        onClick={() => handleResolvePost(trail._id)}
+                        disabled={resolveLoadingId === trail._id}
+                      >
+                        {resolveLoadingId === trail._id
+                          ? "Resolving…"
+                          : "Resolve"}
+                      </button>
+
+                      <button
+                        className="admin-delete-post-button"
+                        onClick={() => handleDeletePost(trail._id)}
+                        disabled={deleteLoadingId === trail._id}
+                      >
+                        {deleteLoadingId === trail._id ? "Deleting…" : "Delete"}
+                      </button>
                     </div>
                   </div>
-                )}
-
-                <div className="admin-card-actions">
-                  <button
-                    className="admin-view-post-button"
-                    onClick={() => navigate(`/trail/${trail._id}`)}
-                  >
-                    View
-                  </button>
-                  <button
-                    className="admin-delete-post-button"
-                    onClick={() => handleDeletePost(trail._id)}
-                    disabled={deleteLoadingId === trail._id}
-                  >
-                    {deleteLoadingId === trail._id ? "Deleting…" : "Delete "}
-                  </button>
                 </div>
-              </div>
+              ))}
             </div>
-          ))}
+          )}
+        </>
+      )}
+
+      {activeTab === "users" && (
+        <>
+          <div className="admin-user-toolbar">
+            <input
+              type="text"
+              className="admin-user-search"
+              placeholder="Search users by username or email..."
+              value={userSearch}
+              onChange={(e) => {
+                setUserSearch(e.target.value);
+                setUserPage(1);
+              }}
+            />
+          </div>
+
+          {usersLoading && (
+            <div className="admin-loading">
+              <p>Loading users…</p>
+            </div>
+          )}
+
+          {usersError && (
+            <div className="admin-error-box">
+              <p>{usersError}</p>
+            </div>
+          )}
+
+          {!usersLoading && !usersError && usersList.length === 0 && (
+            <div className="admin-empty-state">
+              <p>No users found.</p>
+            </div>
+          )}
+
+          {!usersLoading && !usersError && usersList.length > 0 && (
+            <>
+              <div className="admin-user-list">
+                {usersList.map((targetUser) => {
+                  const isCurrentAdmin =
+                    String(targetUser._id) === String(user.id);
+                  const isAdminAccount = targetUser.role === "admin";
+
+                  return (
+                    <div key={targetUser._id} className="admin-user-card">
+                      <div className="admin-user-main">
+                        <div className="admin-user-avatar">
+                          {targetUser.username?.charAt(0).toUpperCase() || "?"}
+                        </div>
+
+                        <div className="admin-user-text">
+                          <h2 className="admin-user-name">
+                            {targetUser.username}
+                          </h2>
+                          <p className="admin-user-email">{targetUser.email}</p>
+                        </div>
+                      </div>
+
+                      <div className="admin-user-badges">
+                        <span
+                          className={`admin-role-badge ${
+                            targetUser.role === "admin" ? "admin" : "user"
+                          }`}
+                        >
+                          {targetUser.role === "admin" ? "Admin" : "User"}
+                        </span>
+
+                        {targetUser.suspended && (
+                          <span className="admin-suspended-badge">
+                            Suspended
+                            {targetUser.suspendedUntil
+                              ? ` until ${new Date(
+                                  targetUser.suspendedUntil
+                                ).toLocaleDateString()}`
+                              : ""}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="admin-card-actions">
+                        <button
+                          className="admin-suspend-user-button"
+                          onClick={() =>
+                            targetUser.suspended
+                              ? handleUnsuspendUser(targetUser)
+                              : openSuspendModal(targetUser)
+                          }
+                          disabled={
+                            suspendUserLoadingId === targetUser._id ||
+                            isCurrentAdmin ||
+                            isAdminAccount
+                          }
+                        >
+                          {suspendUserLoadingId === targetUser._id
+                            ? "Saving…"
+                            : targetUser.suspended
+                            ? "Unsuspend"
+                            : "Suspend"}
+                        </button>
+
+                        <button
+                          className="admin-delete-user-button"
+                          onClick={() => handleDeleteUser(targetUser)}
+                          disabled={
+                            deleteUserLoadingId === targetUser._id ||
+                            isCurrentAdmin ||
+                            isAdminAccount
+                          }
+                        >
+                          {deleteUserLoadingId === targetUser._id
+                            ? "Deleting…"
+                            : "Delete Account"}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="admin-pagination">
+                <button
+                  className="admin-page-button"
+                  disabled={(userPagination?.page || 1) <= 1}
+                  onClick={() => setUserPage((prev) => Math.max(prev - 1, 1))}
+                >
+                  Previous
+                </button>
+
+                <span className="admin-page-indicator">
+                  Page {userPagination?.page || 1} of{" "}
+                  {userPagination?.totalPages || 1}
+                </span>
+
+                <button
+                  className="admin-page-button"
+                  disabled={
+                    (userPagination?.page || 1) >=
+                    (userPagination?.totalPages || 1)
+                  }
+                  onClick={() =>
+                    setUserPage((prev) =>
+                      Math.min(prev + 1, userPagination?.totalPages || 1)
+                    )
+                  }
+                >
+                  Next
+                </button>
+              </div>
+            </>
+          )}
+        </>
+      )}
+
+      {showSuspendModal && selectedUserForSuspension && (
+        <div className="admin-modal-overlay" onClick={closeSuspendModal}>
+          <div
+            className="admin-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="admin-modal-header">
+              <h2>Suspend User</h2>
+              <button
+                className="admin-modal-close"
+                onClick={closeSuspendModal}
+                type="button"
+                disabled={!!suspendUserLoadingId}
+              >
+                ×
+              </button>
+            </div>
+
+            <p className="admin-modal-text">
+              Choose how long <strong>{selectedUserForSuspension.username}</strong>{" "}
+              should be suspended for.
+            </p>
+
+            <div className="admin-modal-field">
+              <label htmlFor="suspensionDays">Suspension Length (days)</label>
+              <input
+                id="suspensionDays"
+                type="number"
+                min="1"
+                value={suspensionDays}
+                onChange={(e) => setSuspensionDays(e.target.value)}
+                className="admin-modal-input"
+              />
+            </div>
+
+            {suspensionModalError && (
+              <p className="admin-modal-error">{suspensionModalError}</p>
+            )}
+
+            <div className="admin-modal-actions">
+              <button
+                type="button"
+                className="admin-modal-cancel-button"
+                onClick={closeSuspendModal}
+                disabled={!!suspendUserLoadingId}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className="admin-modal-confirm-button"
+                onClick={handleConfirmSuspension}
+                disabled={!!suspendUserLoadingId}
+              >
+                {suspendUserLoadingId ? "Saving…" : "Confirm Suspension"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
