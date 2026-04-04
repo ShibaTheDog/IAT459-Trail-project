@@ -25,6 +25,7 @@ function Dashboard() {
   const [isDistanceDropdownOpen, setIsDistanceDropdownOpen] = useState(false);
   const [minDistance, setMinDistance] = useState(0);
   const [maxDistance, setMaxDistance] = useState(30);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
@@ -67,13 +68,18 @@ function Dashboard() {
     const value = e.target.value;
     setSearchQuery(value);
 
-    let filtered = dataSet;
-
-    if (value.trim() !== "") {
-      filtered = dataSet.filter((trail) =>
-        trail.trailTitle.toLowerCase().includes(value.toLowerCase()),
-      );
+    if (value.trim() === "") {
+      setSearchResults([]);
+      return;
     }
+
+    const q = value.toLowerCase();
+
+    let filtered = dataSet.filter(
+      (trail) =>
+        trail.trailTitle.toLowerCase().includes(q) ||
+        trail.region.toLowerCase().includes(q),
+    );
 
     if (showOnlyWithPosts) {
       filtered = filtered.filter((trail) =>
@@ -87,7 +93,20 @@ function Dashboard() {
       );
     }
 
-    setSearchResults(filtered.slice(0, 5));
+    setSearchResults(filtered.slice(0, 8));
+  }
+
+  function highlightMatch(text, query) {
+    if (!query.trim()) return text;
+    const idx = text.toLowerCase().indexOf(query.toLowerCase());
+    if (idx === -1) return text;
+    return (
+      <>
+        {text.slice(0, idx)}
+        <strong>{text.slice(idx, idx + query.length)}</strong>
+        {text.slice(idx + query.length)}
+      </>
+    );
   }
 
   const myTrails = user
@@ -98,7 +117,9 @@ function Dashboard() {
       })
     : [];
 
-  const otherTrails = user
+  const otherTrails = trails.filter((trail) => !isTrailFlagged(trail));
+
+  const topHikingMoments = user
     ? trails.filter((trail) => {
         const postUserId = trail.user?._id || trail.user;
         const loggedInUserId = user?.id || user?._id;
@@ -116,34 +137,6 @@ function Dashboard() {
         >
           <div className="hero-overlay" />
 
-          <nav className="hero-nav">
-            <span className="hero-logo">TrailTracker</span>
-            {user ? (
-              <div
-                className="profile-avatar"
-                onClick={() => navigate("/profile")}
-                title="View Profile"
-              >
-                {user.username.charAt(0).toUpperCase()}
-              </div>
-            ) : (
-              <div className="header-buttons">
-                <button
-                  className="button-outline"
-                  onClick={() => navigate("/login")}
-                >
-                  Login
-                </button>
-                <button
-                  className="button-primary"
-                  onClick={() => navigate("/register")}
-                >
-                  Sign Up
-                </button>
-              </div>
-            )}
-          </nav>
-
           <div className="hero-content">
             <h1 className="hero-title">
               {user
@@ -156,7 +149,7 @@ function Dashboard() {
                 <div className="search-input-container">
                   <input
                     type="text"
-                    placeholder="Search by city, park, or trail name"
+                    placeholder="Search by trail name"
                     value={searchQuery}
                     onChange={handleSearch}
                     className="trail-search-input"
@@ -166,10 +159,14 @@ function Dashboard() {
                 <div className="search-filter-container">
                   <button
                     className="search-filter-button"
-                    onClick={() => setIsPostFilterDropdownOpen(!isPostFilterDropdownOpen)}
+                    onClick={() =>
+                      setIsPostFilterDropdownOpen(!isPostFilterDropdownOpen)
+                    }
                   >
                     Trail
-                    <span className={`dropdown-arrow ${isPostFilterDropdownOpen ? "open" : ""}`}>
+                    <span
+                      className={`dropdown-arrow ${isPostFilterDropdownOpen ? "open" : ""}`}
+                    >
                       &#9662;
                     </span>
                   </button>
@@ -204,22 +201,136 @@ function Dashboard() {
                   )}
                 </div>
 
-                {searchResults.length > 0 && (
+                {searchQuery.trim() && (
                   <div className="search-dropdown">
-                    {searchResults.map((trail) => (
-                      <div
-                        key={trail.id}
-                        className="search-result-item"
-                        onClick={() => navigate(`/trail-result/${trail.id}`)}
-                      >
-                        {trail.trailTitle}
+                    {searchResults.length === 0 ? (
+                      <div className="search-result-empty">
+                        No trails found for &quot;{searchQuery}&quot;
                       </div>
-                    ))}
+                    ) : (
+                      searchResults.map((trail) => (
+                        <div
+                          key={trail.id}
+                          className="search-result-item"
+                          onClick={() => {
+                            setSearchQuery("");
+                            setSearchResults([]);
+                            navigate(`/trail-result/${trail.id}`);
+                          }}
+                        >
+                          <div className="search-result-title">
+                            {highlightMatch(trail.trailTitle, searchQuery)}
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 )}
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="moments-section other-moments">
+          <h2>Top Hiking Moment</h2>
+          {topHikingMoments.length === 0 ? (
+            <div className="empty-state">
+              <p>
+                <strong>No moments shared by others yet.</strong>
+              </p>
+            </div>
+          ) : (
+            <div className="trails-grid trails-grid-4col">
+              {topHikingMoments.slice(0, 8).map((trail) => (
+                <div
+                  key={trail._id || trail.id}
+                  className="trail-card"
+                  onClick={() => navigate(`/trail/${trail._id || trail.id}`)}
+                >
+                  {trail.imgUrl && trail.imgUrl.trim() !== "" ? (
+                    <img src={trail.imgUrl} alt={trail.title} />
+                  ) : (
+                    <div className="no-image-container">No Image</div>
+                  )}
+                  <div className="trail-info">
+                    <h3>{trail.title}</h3>
+                    {trail.user?.username && (
+                      <p className="trail-card-username">
+                        {trail.user.username}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* ── My Trail Moment ── */}
+        <div className="moments-section my-moments">
+          {!user ? (
+            <>
+              <h2>My Trail Moment</h2>
+              <div className="empty-state">
+                <p>
+                  <strong>
+                    You must login or create an account to make a post
+                  </strong>
+                </p>
+                <button
+                  className="login-button"
+                  onClick={() => navigate("/login")}
+                >
+                  Login
+                </button>
+              </div>
+            </>
+          ) : myTrails.length === 0 ? (
+            <>
+              <h2>My Trail Moment</h2>
+              <div className="empty-state">
+                <p>
+                  <strong>No posts created yet. Why not create one?</strong>
+                </p>
+                <button
+                  className="login-button"
+                  onClick={() => navigate("/create-post")}
+                >
+                  Create post
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="section-header-row">
+                <h2>My Trail Moment</h2>
+                <button
+                  className="login-button"
+                  onClick={() => navigate("/create-post")}
+                >
+                  Create post
+                </button>
+              </div>
+              <div className="trails-grid">
+                {myTrails.map((trail) => (
+                  <div
+                    key={trail._id || trail.id}
+                    className="trail-card"
+                    onClick={() => navigate(`/trail/${trail._id || trail.id}`)}
+                  >
+                    {trail.imgUrl && trail.imgUrl.trim() !== "" ? (
+                      <img src={trail.imgUrl} alt={trail.title} />
+                    ) : (
+                      <div className="no-image-container">No Image</div>
+                    )}
+                    <div className="trail-info">
+                      <h3>{trail.title}</h3>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         <div className="map-section">
@@ -457,9 +568,8 @@ function Dashboard() {
           )}
         </div>
 
-
         <div className="moments-section other-moments">
-          <h2>Top Hiking Moment</h2>
+          <h2>All Moments</h2>
           {otherTrails.length === 0 ? (
             <div className="empty-state">
               <p>
@@ -468,7 +578,7 @@ function Dashboard() {
             </div>
           ) : (
             <div className="trails-grid trails-grid-4col">
-              {otherTrails.slice(0, 8).map((trail) => (
+              {otherTrails.slice(0, 100).map((trail) => (
                 <div
                   key={trail._id || trail.id}
                   className="trail-card"
@@ -481,6 +591,11 @@ function Dashboard() {
                   )}
                   <div className="trail-info">
                     <h3>{trail.title}</h3>
+                    {trail.user?.username && (
+                      <p className="trail-card-username">
+                        {trail.user.username}
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}

@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
+import { dataSet } from "./assets/dataSet";
 import "./stylesheets/detail.css";
 
 function TrailDetail() {
@@ -9,8 +10,8 @@ function TrailDetail() {
   const [pageError, setPageError] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const [showDotsMenu, setShowDotsMenu] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [reportReason, setReportReason] = useState("offensive");
   const [reportMessage, setReportMessage] = useState("");
   const [reportLoading, setReportLoading] = useState(false);
@@ -97,7 +98,10 @@ function TrailDetail() {
   }
 
   function openReportModal() {
-    setShowDotsMenu(false);
+    if (!user) {
+      setShowLoginPrompt(true);
+      return;
+    }
     setReportError("");
     setReportSuccess("");
     setShowReportModal(true);
@@ -186,42 +190,25 @@ function TrailDetail() {
       </div>
 
       <div className="trail-detail-container">
-        {user && !isOwner && (
-          <>
-            <button
-              className="dots-menu-button"
-              onClick={() => setShowDotsMenu(true)}
-              aria-label="More options"
-            >
-              <span /><span /><span />
-            </button>
-
-            {showDotsMenu && (
-              <div className="dots-menu-overlay" onClick={() => setShowDotsMenu(false)}>
-                <div className="dots-menu-sheet" onClick={(e) => e.stopPropagation()}>
-                  <button className="dots-menu-option report" onClick={openReportModal}>
-                    Report
-                  </button>
-                  {user?.role === "admin" && (
-                    <>
-                      <div className="dots-menu-divider" />
-                      <button
-                        className="dots-menu-option report"
-                        onClick={handleAdminDelete}
-                        disabled={deleteLoading}
-                      >
-                        Delete
-                      </button>
-                    </>
-                  )}
-                  <div className="dots-menu-divider" />
-                  <button className="dots-menu-option cancel" onClick={() => setShowDotsMenu(false)}>
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
-          </>
+        {user?.role === "admin" ? (
+          <button
+            className="trail-action-button trail-action-delete"
+            onClick={handleAdminDelete}
+            disabled={deleteLoading}
+          >
+            {deleteLoading ? "Deleting..." : "Delete"}
+          </button>
+        ) : (
+          !isOwner && (
+            <div className="report-action-wrapper">
+              <button
+                className="trail-action-button trail-action-report"
+                onClick={openReportModal}
+              >
+                Report
+              </button>
+            </div>
+          )
         )}
 
         <div className="trail-detail-image-section">
@@ -241,7 +228,9 @@ function TrailDetail() {
             <div className="post-author-avatar">
               {trail.user?.username?.charAt(0).toUpperCase() ?? "?"}
             </div>
-            <span className="post-author-name">{trail.user?.username ?? "Unknown"}</span>
+            <span className="post-author-name">
+              {trail.user?.username ?? "Unknown"}
+            </span>
           </div>
 
           <div className="trail-title-row">
@@ -256,7 +245,24 @@ function TrailDetail() {
 
           <p className="trail-detail-description">{trail.description}</p>
 
-          {trail.tag && <div className="trail-detail-tag">{trail.tag}</div>}
+          {trail.tag && (() => {
+            const match = dataSet.find(
+              (t) => t.trailTitle.toLowerCase().trim() === trail.tag.toLowerCase().trim()
+            );
+            return (
+              <div className="trail-tag-group">
+                <div className="trail-detail-tag">{trail.tag}</div>
+                {match && (
+                  <button
+                    className="view-trail-button"
+                    onClick={() => navigate(`/trail-result/${match.id}`)}
+                  >
+                    View Trail
+                  </button>
+                )}
+              </div>
+            );
+          })()}
 
           {reportError && <p className="form-message error">{reportError}</p>}
           {reportSuccess && (
@@ -344,6 +350,37 @@ function TrailDetail() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showLoginPrompt && (
+        <div
+          className="login-prompt-overlay"
+          onClick={() => setShowLoginPrompt(false)}
+        >
+          <div
+            className="login-prompt-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="login-prompt-title">Login required</h3>
+            <p className="login-prompt-text">
+              You need to be logged in to report a post.
+            </p>
+            <div className="login-prompt-actions">
+              <button
+                className="login-prompt-login"
+                onClick={() => navigate("/login")}
+              >
+                Log in
+              </button>
+              <button
+                className="login-prompt-dismiss"
+                onClick={() => setShowLoginPrompt(false)}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}

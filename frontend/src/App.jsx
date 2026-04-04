@@ -3,6 +3,7 @@ import {
   BrowserRouter as Router,
   Routes,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 
@@ -16,11 +17,18 @@ import TrailResult from "./TrailResult";
 import Profile from "./Profile";
 import AdminModeration from "./adminModeration";
 import ProtectedAdminRoute from "./ProtectedAdminRoute";
+import Navbar from "./Navbar";
 
-function App() {
+function AppContent() {
+  const location = useLocation();
+  const hideNavbar = ["/register", "/login", "/profile"].includes(
+    location.pathname,
+  );
+
   return (
-    <AuthProvider>
-      <Router>
+    <>
+      {!hideNavbar && <Navbar />}
+      <div style={!hideNavbar ? { paddingTop: "56px" } : {}}>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           {/* <Route
@@ -55,6 +63,16 @@ function App() {
             }
           />
         </Routes>
+      </div>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <AppContent />
       </Router>
     </AuthProvider>
   );

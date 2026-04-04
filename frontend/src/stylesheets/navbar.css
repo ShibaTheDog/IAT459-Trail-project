@@ -1,0 +1,32 @@
+.global-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  height: 56px;
+  background: #fff;
+  border-bottom: 1px solid #e8e8e8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 60px;
+}
+
+.global-navbar-logo {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #111;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+}
+
+.global-navbar-logo:hover {
+  color: #038220;
+}
+
+.global-navbar-avatar {
+  width: 38px;
+  height: 38px;
+  font-size: 1rem;
+}

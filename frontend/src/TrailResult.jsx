@@ -98,7 +98,19 @@ function TrailResult() {
       </div>
 
       <div className="trail-posts-section">
-        <h2>Posts for this Trail</h2>
+        <div className="section-header-row">
+          <h2>Posts for this Trail</h2>
+          <button
+            className="login-button"
+            onClick={() =>
+              navigate("/create-post", {
+                state: { preselectedTrail: trail.trailTitle },
+              })
+            }
+          >
+            Create Post
+          </button>
+        </div>
 
         {matchingPosts.length === 0 ? (
           <div className="empty-state">
@@ -117,6 +129,9 @@ function TrailResult() {
                 {post.imgUrl && <img src={post.imgUrl} alt={post.title} />}
                 <div className="trail-info">
                   <h3>{post.title}</h3>
+                  {post.user?.username && (
+                    <p className="trail-card-username">{post.user.username}</p>
+                  )}
                 </div>
               </div>
             ))}

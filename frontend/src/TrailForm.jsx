@@ -1,14 +1,17 @@
 import { useContext, useState } from "react";
 import "./stylesheets/dashboard.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
 import { dataSet } from "./assets/dataSet";
 
 function TrailForm() {
+  const location = useLocation();
+  const preselectedTrail = location.state?.preselectedTrail || "";
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    tag: "",
+    tag: preselectedTrail,
     imgUrl: "",
   });
 
@@ -16,7 +19,7 @@ function TrailForm() {
   const navigate = useNavigate();
   const { token, user } = useContext(AuthContext);
 
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(preselectedTrail);
   const [searchResults, setSearchResults] = useState([]);
 
   const handleChange = (e) => {
@@ -160,8 +163,13 @@ function TrailForm() {
                 value={searchQuery}
                 onChange={handleSearch}
                 className="trail-search-input"
-                disabled={!user}
-                style={{ border: "1px solid #999", borderRadius: "6px" }}
+                disabled={!user || !!preselectedTrail}
+                style={{
+                  border: "1px solid #999",
+                  borderRadius: "6px",
+                  backgroundColor: preselectedTrail ? "#d9d9d9" : "#ffffff",
+                  cursor: preselectedTrail ? "not-allowed" : "text",
+                }}
               />
               {searchResults.length > 0 && (
                 <div className="search-dropdown">

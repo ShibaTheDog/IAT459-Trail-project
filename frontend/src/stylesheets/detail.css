@@ -47,86 +47,129 @@
   position: relative;
 }
 
-.dots-menu-button {
+.report-action-wrapper {
   position: absolute;
   top: 14px;
   right: 18px;
-  background: none;
-  border: 1.5px solid #ccc;
-  border-radius: 6px;
-  width: 34px;
-  height: 34px;
-  cursor: pointer;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  padding: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  z-index: 10;
 }
 
-.dots-menu-button:hover {
-  background-color: #f0f0f0;
-  border-color: #aaa;
+.report-action-wrapper .trail-action-button {
+  position: static;
 }
 
-.dots-menu-button span {
-  display: block;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background-color: #555;
-}
-
-.dots-menu-overlay {
+.login-prompt-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   z-index: 1000;
-}
-
-.dots-menu-sheet {
-  width: 100%;
-  max-width: 360px;
-  background: #fff;
-  border-radius: 14px;
-  overflow: hidden;
-  margin: 0 16px;
-}
-
-.dots-menu-option {
-  width: 100%;
-  padding: 16px;
-  background: none;
-  border: none;
-  font-size: 1rem;
-  cursor: pointer;
+  padding: 20px;
   text-align: center;
 }
 
-.dots-menu-option.report {
-  color: #b64e4e;
+.login-prompt-modal {
+  background: #fff;
+  border-radius: 14px;
+  padding: 32px 28px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.login-prompt-title {
+  font-size: 1.3rem;
   font-weight: 700;
+  color: #111;
+  margin: 0;
 }
 
-.dots-menu-option.report:hover {
-  background-color: #fdf0f0;
+.login-prompt-text {
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.5;
+  margin: 0;
 }
 
-.dots-menu-option.cancel {
-  color: #333;
-  font-weight: 400;
+.login-prompt-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
 }
 
-.dots-menu-option.cancel:hover {
+.login-prompt-login {
+  flex: 1;
+  background-color: #038220;
+  color: white;
+  border: none;
+  padding: 11px 0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.login-prompt-login:hover {
+  background-color: #026a1a;
+}
+
+.login-prompt-dismiss {
+  flex: 1;
+  background-color: transparent;
+  color: #555;
+  border: 1px solid #ccc;
+  padding: 11px 0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.login-prompt-dismiss:hover {
   background-color: #f5f5f5;
 }
 
-.dots-menu-divider {
-  height: 1px;
-  background-color: #dbdbdb;
+.trail-action-button {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.trail-action-report {
+  background-color: transparent;
+  color: #b64e4e;
+  border: 1.5px solid #b64e4e;
+}
+
+.trail-action-report:hover {
+  background-color: #fdf0f0;
+}
+
+.trail-action-delete {
+  background-color: #b64e4e;
+  color: white;
+}
+
+.trail-action-delete:hover {
+  background-color: #a03d3d;
+}
+
+.trail-action-delete:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 
 .trail-detail-image-section {
@@ -183,6 +226,7 @@
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  margin-top: -1rem;
 }
 
 .trail-detail-title {
@@ -214,6 +258,29 @@
   line-height: 1.6;
   color: #444;
   white-space: pre-wrap;
+}
+
+.trail-tag-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.view-trail-button {
+  background-color: #038220;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.view-trail-button:hover {
+  opacity: 0.8;
 }
 
 .trail-detail-tag {
@@ -291,6 +358,13 @@
   cursor: not-allowed;
 }
 
+.section-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 .trail-posts-section {
   width: 100%;
   max-width: 1000px;
@@ -301,6 +375,12 @@
   font-weight: bold;
   margin-bottom: 20px;
   color: #000;
+}
+
+.trail-card-username {
+  font-size: 1.2rem;
+  color: #777;
+  margin: 2px 0 6px 0;
 }
 
 .no-image-container {
