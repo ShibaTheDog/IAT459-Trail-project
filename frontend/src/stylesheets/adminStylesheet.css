@@ -202,6 +202,7 @@
   background-color: #fff8e1;
   color: #b26a00;
   border: 1px solid #b26a00;
+  margin-left: auto;
 }
 
 .admin-card-description {
@@ -718,4 +719,14 @@
   .admin-modal-actions {
     flex-wrap: wrap;
   }
+}
+
+.admin-post-author-header {
+  margin-bottom: 8px;
+}
+
+.admin-post-author-avatar {
+  width: 32px;
+  height: 32px;
+  font-size: 0.85rem;
 }

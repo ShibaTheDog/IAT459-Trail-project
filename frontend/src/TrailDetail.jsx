@@ -222,33 +222,6 @@ function TrailDetail() {
       </div>
 
       <div className="trail-detail-container">
-        {user?.role === "admin" ? (
-          <button
-            className="trail-action-button trail-action-delete"
-            onClick={handleAdminDelete}
-            disabled={deleteLoading}
-          >
-            {deleteLoading ? "Deleting..." : "Delete"}
-          </button>
-        ) : (
-          !isOwner && (
-            <div className="report-action-wrapper">
-              <button
-                className="trail-action-button trail-action-report"
-                onClick={openReportModal}
-                disabled={hasUserReported}
-                title={
-                  hasUserReported
-                    ? "You have already reported this post."
-                    : "Report this post"
-                }
-              >
-                {hasUserReported ? "Already Reported" : "Report"}
-              </button>
-            </div>
-          )
-        )}
-
         <div className="trail-detail-image-section">
           {trail.imgUrl ? (
             <img
@@ -269,6 +242,32 @@ function TrailDetail() {
             <span className="post-author-name">
               {trail.user?.username ?? "Unknown"}
             </span>
+            <div className="post-author-actions">
+              {user?.role === "admin" ? (
+                <button
+                  className="trail-action-button trail-action-delete"
+                  onClick={handleAdminDelete}
+                  disabled={deleteLoading}
+                >
+                  {deleteLoading ? "Deleting..." : "Delete"}
+                </button>
+              ) : (
+                !isOwner && (
+                  <button
+                    className="trail-action-button trail-action-report"
+                    onClick={openReportModal}
+                    disabled={hasUserReported}
+                    title={
+                      hasUserReported
+                        ? "You have already reported this post."
+                        : "Report this post"
+                    }
+                  >
+                    {hasUserReported ? "Already Reported" : "Report"}
+                  </button>
+                )
+              )}
+            </div>
           </div>
 
           <div className="trail-title-row">

@@ -59,8 +59,8 @@ input::placeholder {
 
 .button-outline {
   background-color: transparent;
-  color: #a7de83;
-  border: 2px solid #a7de83;
+  color: #038220;
+  border: 2px solid #038220;
   padding: 8px 22px;
   border-radius: 8px;
   font-size: 1rem;
@@ -70,9 +70,9 @@ input::placeholder {
 }
 
 .button-outline:hover {
-  background-color: #f0f3ff;
-  border-color: #4862d9;
-  color: #4862d9;
+  background-color: #e6f4ea;
+  border-color: #026b1a;
+  color: #026b1a;
 }
 
 .button-secondary {

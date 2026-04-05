@@ -51,9 +51,12 @@ function AdminModeration() {
       setError("");
 
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/api/trails/admin/reported", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        "http://localhost:5000/api/trails/admin/reported",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
 
       const data = await res.json();
 
@@ -86,7 +89,7 @@ function AdminModeration() {
         `http://localhost:5000/api/users/admin/users?${params.toString()}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const data = await res.json();
@@ -98,8 +101,8 @@ function AdminModeration() {
       const normalizedUsers = Array.isArray(data?.users)
         ? data.users
         : Array.isArray(data)
-        ? data
-        : [];
+          ? data
+          : [];
 
       const normalizedPagination = data?.pagination || {
         page: 1,
@@ -126,7 +129,7 @@ function AdminModeration() {
 
   async function handleDeletePost(trailId) {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this post? This action cannot be undone."
+      "Are you sure you want to delete this post? This action cannot be undone.",
     );
     if (!confirmed) return;
 
@@ -134,10 +137,13 @@ function AdminModeration() {
       setDeleteLoadingId(trailId);
       const token = localStorage.getItem("token");
 
-      const res = await fetch(`http://localhost:5000/api/trails/admin/${trailId}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        `http://localhost:5000/api/trails/admin/${trailId}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
 
       const data = await res.json();
 
@@ -145,7 +151,9 @@ function AdminModeration() {
         throw new Error(data.error || "Failed to delete post");
       }
 
-      setReportedTrails((prev) => prev.filter((trail) => trail._id !== trailId));
+      setReportedTrails((prev) =>
+        prev.filter((trail) => trail._id !== trailId),
+      );
     } catch (err) {
       alert(err.message);
     } finally {
@@ -155,7 +163,7 @@ function AdminModeration() {
 
   async function handleResolvePost(trailId) {
     const confirmed = window.confirm(
-      "Mark this report as resolved and restore the post?"
+      "Mark this report as resolved and restore the post?",
     );
     if (!confirmed) return;
 
@@ -168,7 +176,7 @@ function AdminModeration() {
         {
           method: "PATCH",
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const data = await res.json();
@@ -177,7 +185,9 @@ function AdminModeration() {
         throw new Error(data.error || "Failed to resolve report");
       }
 
-      setReportedTrails((prev) => prev.filter((trail) => trail._id !== trailId));
+      setReportedTrails((prev) =>
+        prev.filter((trail) => trail._id !== trailId),
+      );
     } catch (err) {
       alert(err.message);
     } finally {
@@ -187,7 +197,7 @@ function AdminModeration() {
 
   async function handleDeleteUser(targetUser) {
     const confirmed = window.confirm(
-      `Delete ${targetUser.username}'s account and all their posts? This cannot be undone.`
+      `Delete ${targetUser.username}'s account and all their posts? This cannot be undone.`,
     );
     if (!confirmed) return;
 
@@ -200,7 +210,7 @@ function AdminModeration() {
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const data = await res.json();
@@ -260,7 +270,7 @@ function AdminModeration() {
             suspended: true,
             durationDays: parsedDays,
           }),
-        }
+        },
       );
 
       const data = await res.json();
@@ -271,8 +281,8 @@ function AdminModeration() {
 
       setUsersList((prev) =>
         prev.map((u) =>
-          u._id === selectedUserForSuspension._id ? { ...u, ...data.user } : u
-        )
+          u._id === selectedUserForSuspension._id ? { ...u, ...data.user } : u,
+        ),
       );
 
       closeSuspendModal();
@@ -285,7 +295,7 @@ function AdminModeration() {
 
   async function handleUnsuspendUser(targetUser) {
     const confirmed = window.confirm(
-      `Unsuspend ${targetUser.username}'s account?`
+      `Unsuspend ${targetUser.username}'s account?`,
     );
     if (!confirmed) return;
 
@@ -304,7 +314,7 @@ function AdminModeration() {
           body: JSON.stringify({
             suspended: false,
           }),
-        }
+        },
       );
 
       const data = await res.json();
@@ -314,7 +324,9 @@ function AdminModeration() {
       }
 
       setUsersList((prev) =>
-        prev.map((u) => (u._id === targetUser._id ? { ...u, ...data.user } : u))
+        prev.map((u) =>
+          u._id === targetUser._id ? { ...u, ...data.user } : u,
+        ),
       );
     } catch (err) {
       alert(err.message);
@@ -342,7 +354,7 @@ function AdminModeration() {
           className={`admin-nav-tab ${activeTab === "posts" ? "active" : ""}`}
           onClick={() => setActiveTab("posts")}
         >
-          Post Moderation
+          Post
         </button>
         <button
           className={`admin-nav-tab ${activeTab === "users" ? "active" : ""}`}
@@ -351,7 +363,7 @@ function AdminModeration() {
             setUserPage(1);
           }}
         >
-          User Moderation
+          User
         </button>
       </div>
 
@@ -392,8 +404,13 @@ function AdminModeration() {
                   </div>
 
                   <div className="admin-card-info-col">
-                    <div className="admin-card-title-row">
-                      <h2 className="admin-card-title">{trail.title}</h2>
+                    <div className="post-author-header admin-post-author-header">
+                      <div className="post-author-avatar admin-post-author-avatar">
+                        {trail.user?.username?.charAt(0).toUpperCase() ?? "?"}
+                      </div>
+                      <span className="post-author-name">
+                        {trail.user?.username ?? "Unknown"}
+                      </span>
                       <span className="admin-status-badge">
                         {trail.moderationStatus === "under_investigation"
                           ? "Under Investigation"
@@ -401,23 +418,23 @@ function AdminModeration() {
                       </span>
                     </div>
 
+                    <div className="admin-card-title-row">
+                      <h2 className="admin-card-title">{trail.title}</h2>
+                    </div>
+
                     {trail.description && (
-                      <p className="admin-card-description">{trail.description}</p>
+                      <p className="admin-card-description">
+                        {trail.description}
+                      </p>
                     )}
 
                     <div className="admin-card-meta">
-                      <div className="admin-meta-item">
-                        <span className="admin-meta-label">Post Owner</span>
-                        <span className="admin-meta-value">
-                          {trail.user?.username || "Unknown"}
-                        </span>
-                      </div>
-                      <div className="admin-meta-item">
+                      {/* <div className="admin-meta-item">
                         <span className="admin-meta-label">Total Reports</span>
                         <span className="admin-meta-value admin-meta-count">
                           {trail.reports?.length || 0}
                         </span>
-                      </div>
+                      </div> */}
                     </div>
 
                     {trail.reports?.length > 0 && (
@@ -549,7 +566,7 @@ function AdminModeration() {
                             Suspended
                             {targetUser.suspendedUntil
                               ? ` until ${new Date(
-                                  targetUser.suspendedUntil
+                                  targetUser.suspendedUntil,
                                 ).toLocaleDateString()}`
                               : ""}
                           </span>
@@ -573,8 +590,8 @@ function AdminModeration() {
                           {suspendUserLoadingId === targetUser._id
                             ? "Saving…"
                             : targetUser.suspended
-                            ? "Unsuspend"
-                            : "Suspend"}
+                              ? "Unsuspend"
+                              : "Suspend"}
                         </button>
 
                         <button
@@ -588,7 +605,7 @@ function AdminModeration() {
                         >
                           {deleteUserLoadingId === targetUser._id
                             ? "Deleting…"
-                            : "Delete Account"}
+                            : "Delete"}
                         </button>
                       </div>
                     </div>
@@ -618,7 +635,7 @@ function AdminModeration() {
                   }
                   onClick={() =>
                     setUserPage((prev) =>
-                      Math.min(prev + 1, userPagination?.totalPages || 1)
+                      Math.min(prev + 1, userPagination?.totalPages || 1),
                     )
                   }
                 >
@@ -632,10 +649,7 @@ function AdminModeration() {
 
       {showSuspendModal && selectedUserForSuspension && (
         <div className="admin-modal-overlay" onClick={closeSuspendModal}>
-          <div
-            className="admin-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
             <div className="admin-modal-header">
               <h2>Suspend User</h2>
               <button
@@ -649,8 +663,9 @@ function AdminModeration() {
             </div>
 
             <p className="admin-modal-text">
-              Choose how long <strong>{selectedUserForSuspension.username}</strong>{" "}
-              should be suspended for.
+              Choose how long{" "}
+              <strong>{selectedUserForSuspension.username}</strong> should be
+              suspended for.
             </p>
 
             <div className="admin-modal-field">

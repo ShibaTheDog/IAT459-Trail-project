@@ -129,6 +129,20 @@ function TrailResult() {
                 className="trail-card"
                 onClick={() => navigate(`/trail/${post._id}`)}
               >
+                <div className="trail-card-author-row">
+                  <div className="post-author-avatar trail-card-avatar">
+                    {post.user?.username?.charAt(0).toUpperCase() ?? "?"}
+                  </div>
+                  <span className="post-author-name">
+                    {post.user?.username ?? "Unknown"}
+                  </span>
+                  {post.moderationStatus === "under_investigation" && (
+                    <span className="trail-card-investigation-badge">
+                      Under Investigation
+                    </span>
+                  )}
+                </div>
+
                 {post.imgUrl ? (
                   <img src={post.imgUrl} alt={post.title} />
                 ) : (
@@ -137,23 +151,6 @@ function TrailResult() {
 
                 <div className="trail-info">
                   <h3>{post.title}</h3>
-
-                  {(post.user?.username ||
-                    post.moderationStatus === "under_investigation") && (
-                    <div className="trail-card-meta-row">
-                      {post.user?.username && (
-                        <p className="trail-card-username">
-                          {post.user.username}
-                        </p>
-                      )}
-
-                      {post.moderationStatus === "under_investigation" && (
-                        <span className="trail-card-investigation-badge">
-                          Under Investigation
-                        </span>
-                      )}
-                    </div>
-                  )}
                 </div>
               </div>
             ))}
