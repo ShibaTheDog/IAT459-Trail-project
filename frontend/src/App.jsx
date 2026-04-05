@@ -5,6 +5,7 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
+import "./stylesheets/navbar.css";
 import { AuthProvider } from "./context/AuthContext";
 
 import Dashboard from "./Dashboard";
@@ -18,6 +19,7 @@ import Profile from "./Profile";
 import AdminModeration from "./adminModeration";
 import ProtectedAdminRoute from "./ProtectedAdminRoute";
 import Navbar from "./Navbar";
+import Moments from "./Moments";
 
 function AppContent() {
   const location = useLocation();
@@ -28,7 +30,7 @@ function AppContent() {
   return (
     <>
       {!hideNavbar && <Navbar />}
-      <div style={!hideNavbar ? { paddingTop: "56px" } : {}}>
+      <div className={!hideNavbar ? "page-with-navbar" : ""}>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           {/* <Route
@@ -44,6 +46,7 @@ function AppContent() {
           <Route path="/register" element={<Register />} />
           <Route path="/trail/:id" element={<TrailDetail />} />
           <Route path="/trail-result/:id" element={<TrailResult />} />
+          <Route path="/moments" element={<Moments />} />
           <Route path="/profile" element={<Profile />} />{" "}
           {/* probably needs to be protected or something*/}
           <Route

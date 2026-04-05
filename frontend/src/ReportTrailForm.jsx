@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./stylesheets/report.css";
 
 function ReportTrailForm({ trailId, onSuccess }) {
   const [reason, setReason] = useState("offensive");
@@ -46,15 +47,15 @@ function ReportTrailForm({ trailId, onSuccess }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginTop: "1rem" }}>
-      <div style={{ marginBottom: "1rem" }}>
+    <form onSubmit={handleSubmit} className="report-form">
+      <div className="report-form-group">
         <label>
           Report reason:
           <br />
           <select
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            style={{ marginTop: "0.5rem", padding: "0.5rem", width: "100%" }}
+            className="report-form-select"
           >
             <option value="offensive">Offensive content</option>
             <option value="harassment">Harassment</option>
@@ -65,7 +66,7 @@ function ReportTrailForm({ trailId, onSuccess }) {
         </label>
       </div>
 
-      <div style={{ marginBottom: "1rem" }}>
+      <div className="report-form-group">
         <label>
           Extra details:
           <br />
@@ -74,23 +75,18 @@ function ReportTrailForm({ trailId, onSuccess }) {
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Add a short explanation"
             rows="4"
-            style={{ marginTop: "0.5rem", padding: "0.5rem", width: "100%" }}
+            className="report-form-textarea"
           />
         </label>
       </div>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {success && <p style={{ color: "green" }}>{success}</p>}
+      {error && <p className="report-form-error">{error}</p>}
+      {success && <p className="report-form-success">{success}</p>}
 
       <button
         type="submit"
         disabled={submitting}
-        style={{
-          padding: "0.75rem 1rem",
-          border: "none",
-          borderRadius: "8px",
-          cursor: submitting ? "not-allowed" : "pointer",
-        }}
+        className={`report-form-submit${submitting ? " report-form-submit--submitting" : ""}`}
       >
         {submitting ? "Submitting..." : "Submit Report"}
       </button>

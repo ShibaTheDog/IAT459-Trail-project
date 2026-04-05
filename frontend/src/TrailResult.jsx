@@ -45,7 +45,7 @@ function TrailResult() {
       </div>
 
       <div className="trail-detail-container">
-        <div className="trail-detail-info-section" style={{ width: "100%" }}>
+        <div className="trail-detail-info-section">
           <h1 className="trail-detail-title">{trail.trailTitle}</h1>
 
           <div className="trail-stats-grid">
@@ -101,7 +101,7 @@ function TrailResult() {
         <div className="section-header-row">
           <h2>Posts for this Trail</h2>
           <button
-            className="login-button"
+            className="create-post-button"
             onClick={() =>
               navigate("/create-post", {
                 state: { preselectedTrail: trail.trailTitle },

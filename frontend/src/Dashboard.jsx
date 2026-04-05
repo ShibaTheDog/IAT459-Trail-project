@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import "./stylesheets/dashboard.css";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
@@ -9,7 +9,6 @@ import {
   useJsApiLoader,
 } from "@react-google-maps/api";
 import { dataSet } from "./assets/dataSet";
-import heroBg from "./assets/background-image.jpg";
 
 function Dashboard() {
   const [trails, setTrails] = useState([]);
@@ -53,11 +52,24 @@ function Dashboard() {
   const [searchResults, setSearchResults] = useState([]);
   const [showOnlyWithPosts, setShowOnlyWithPosts] = useState(false);
 
+  const searchWrapperRef = useRef(null);
+
   useEffect(() => {
     fetch("http://localhost:5000/api/trails")
       .then((res) => res.json())
       .then((data) => setTrails(data))
       .catch((err) => console.error("Error fetching trails:", err));
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (searchWrapperRef.current && !searchWrapperRef.current.contains(e.target)) {
+        setSearchResults([]);
+        setSearchQuery("");
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const isTrailFlagged = (trail) =>
@@ -131,10 +143,7 @@ function Dashboard() {
     <>
       <div className="dashboard-container">
         {/* ── Hero Section ── */}
-        <div
-          className="hero-section"
-          style={{ backgroundImage: `url(${heroBg})` }}
-        >
+        <div className="hero-section">
           <div className="hero-overlay" />
 
           <div className="hero-content">
@@ -144,7 +153,7 @@ function Dashboard() {
                 : "Welcome to TrailTracker"}
             </h1>
 
-            <div className="hero-search-wrapper">
+            <div className="hero-search-wrapper" ref={searchWrapperRef}>
               <div className="search-bar-wrapper">
                 <div className="search-input-container">
                   <input
@@ -152,6 +161,13 @@ function Dashboard() {
                     placeholder="Search by trail name"
                     value={searchQuery}
                     onChange={handleSearch}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && searchResults.length > 0) {
+                        setSearchQuery("");
+                        setSearchResults([]);
+                        navigate(`/trail-result/${searchResults[0].id}`);
+                      }
+                    }}
                     className="trail-search-input"
                   />
                 </div>
@@ -293,7 +309,7 @@ function Dashboard() {
                   <strong>No posts created yet. Why not create one?</strong>
                 </p>
                 <button
-                  className="login-button"
+                  className="create-post-button"
                   onClick={() => navigate("/create-post")}
                 >
                   Create post
@@ -305,7 +321,7 @@ function Dashboard() {
               <div className="section-header-row">
                 <h2>My Trail Moment</h2>
                 <button
-                  className="login-button"
+                  className="create-post-button"
                   onClick={() => navigate("/create-post")}
                 >
                   Create post
@@ -362,15 +378,15 @@ function Dashboard() {
                         ? "Any"
                         : `${minDistance}–${maxDistance} km`}
                     </div>
-                    <div className="dual-range-wrapper">
+                    <div
+                      className="dual-range-wrapper"
+                      style={{
+                        '--fill-left': `${(minDistance / 30) * 100}%`,
+                        '--fill-right': `${((30 - maxDistance) / 30) * 100}%`,
+                      }}
+                    >
                       <div className="dual-range-track">
-                        <div
-                          className="dual-range-fill"
-                          style={{
-                            left: `${(minDistance / 30) * 100}%`,
-                            right: `${((30 - maxDistance) / 30) * 100}%`,
-                          }}
-                        />
+                        <div className="dual-range-fill" />
                       </div>
                       <input
                         type="range"
@@ -565,41 +581,6 @@ function Dashboard() {
                 </InfoWindow>
               )}
             </GoogleMap>
-          )}
-        </div>
-
-        <div className="moments-section other-moments">
-          <h2>All Moments</h2>
-          {otherTrails.length === 0 ? (
-            <div className="empty-state">
-              <p>
-                <strong>No moments shared by others yet.</strong>
-              </p>
-            </div>
-          ) : (
-            <div className="trails-grid trails-grid-4col">
-              {otherTrails.slice(0, 100).map((trail) => (
-                <div
-                  key={trail._id || trail.id}
-                  className="trail-card"
-                  onClick={() => navigate(`/trail/${trail._id || trail.id}`)}
-                >
-                  {trail.imgUrl && trail.imgUrl.trim() !== "" ? (
-                    <img src={trail.imgUrl} alt={trail.title} />
-                  ) : (
-                    <div className="no-image-container">No Image</div>
-                  )}
-                  <div className="trail-info">
-                    <h3>{trail.title}</h3>
-                    {trail.user?.username && (
-                      <p className="trail-card-username">
-                        {trail.user.username}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
           )}
         </div>
 

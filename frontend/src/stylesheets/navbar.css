@@ -13,6 +13,10 @@
   padding: 0 60px;
 }
 
+.page-with-navbar {
+  padding-top: 56px;
+}
+
 .global-navbar-logo {
   font-size: 1.2rem;
   font-weight: 700;
@@ -29,4 +33,22 @@
   width: 38px;
   height: 38px;
   font-size: 1rem;
+}
+
+.global-navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.global-navbar-link {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  letter-spacing: 0.2px;
+}
+
+.global-navbar-link:hover {
+  color: #038220;
 }

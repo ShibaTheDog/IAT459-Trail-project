@@ -222,6 +222,24 @@
   margin-top: 10px;
 }
 
+.create-post-button {
+  background-color: #fff;
+  color: #111;
+  border: 1.5px solid #111;
+  padding: 10px 35px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.create-post-button:hover {
+  border-color: #038220;
+  color: #038220;
+  background-color: #fff;
+}
+
 .bottom-buffer {
   height: 15rem;
 }

@@ -1,5 +1,6 @@
 import { useContext, useState } from "react";
 import "./stylesheets/dashboard.css";
+import "./stylesheets/detail.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
 import { dataSet } from "./assets/dataSet";
@@ -91,14 +92,14 @@ function TrailForm() {
 
   return (
     <div className="dashboard-container">
-      <header className="dashboard-header-1">
+      <div className="back-button-container form-back-button-container">
         <button
           className="profile-back-button"
-          onClick={() => navigate("/dashboard")}
+          onClick={() => navigate(-1)}
         >
           &#8592; Back
         </button>
-      </header>
+      </div>
 
       <div className="trail-form-section">
         <div
@@ -156,20 +157,14 @@ function TrailForm() {
 
           <div className="input-group">
             <label>Select Trail</label>
-            <div style={{ position: "relative" }}>
+            <div className="trail-select-wrapper">
               <input
                 type="text"
                 placeholder="Search for a trail you hiked..."
                 value={searchQuery}
                 onChange={handleSearch}
-                className="trail-search-input"
+                className={`trail-select-input${preselectedTrail ? " trail-select-input--preselected" : ""}`}
                 disabled={!user || !!preselectedTrail}
-                style={{
-                  border: "1px solid #999",
-                  borderRadius: "6px",
-                  backgroundColor: preselectedTrail ? "#d9d9d9" : "#ffffff",
-                  cursor: preselectedTrail ? "not-allowed" : "text",
-                }}
               />
               {searchResults.length > 0 && (
                 <div className="search-dropdown">

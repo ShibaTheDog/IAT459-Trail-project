@@ -13,24 +13,30 @@ function Navbar() {
         TrailTracker
       </span>
 
-      {user ? (
-        <div
-          className="profile-avatar global-navbar-avatar"
-          onClick={() => navigate("/profile")}
-          title="View Profile"
-        >
-          {user.username.charAt(0).toUpperCase()}
-        </div>
-      ) : (
-        <div className="header-buttons">
-          <button className="button-outline" onClick={() => navigate("/login")}>
-            Login
-          </button>
-          <button className="button-primary" onClick={() => navigate("/register")}>
-            Sign Up
-          </button>
-        </div>
-      )}
+      <div className="global-navbar-right">
+        <span className="global-navbar-link" onClick={() => navigate("/moments")}>
+          Moments
+        </span>
+
+        {user ? (
+          <div
+            className="profile-avatar global-navbar-avatar"
+            onClick={() => navigate("/profile")}
+            title="View Profile"
+          >
+            {user.username.charAt(0).toUpperCase()}
+          </div>
+        ) : (
+          <div className="header-buttons">
+            <button className="button-outline" onClick={() => navigate("/login")}>
+              Login
+            </button>
+            <button className="button-primary" onClick={() => navigate("/register")}>
+              Sign Up
+            </button>
+          </div>
+        )}
+      </div>
     </nav>
   );
 }

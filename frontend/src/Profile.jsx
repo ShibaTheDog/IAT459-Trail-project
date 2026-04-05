@@ -145,7 +145,7 @@ function Profile() {
                 <strong>No posts created yet. Why not create one?</strong>
               </p>
               <button
-                className="login-button"
+                className="create-post-button"
                 onClick={() => navigate("/create-post")}
               >
                 Create post
@@ -157,7 +157,7 @@ function Profile() {
             <div className="section-header-row">
               <h2>My Trail Moment</h2>
               <button
-                className="login-button"
+                className="create-post-button"
                 onClick={() => navigate("/create-post")}
               >
                 Create post
