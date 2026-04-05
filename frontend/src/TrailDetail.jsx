@@ -38,7 +38,7 @@ function TrailDetail() {
 
   async function handleAdminDelete() {
     const confirmDelete = window.confirm(
-      "Admin: Are you sure you want to delete this post?",
+      "Admin: Are you sure you want to delete this post?"
     );
     if (!confirmDelete) return;
 
@@ -49,12 +49,14 @@ function TrailDetail() {
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
-        },
+        }
       );
+
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.error || "Failed to delete trail");
       }
+
       navigate("/dashboard");
     } catch (err) {
       console.error("Admin delete error:", err);
@@ -66,7 +68,7 @@ function TrailDetail() {
 
   async function handleDelete() {
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this trail post?",
+      "Are you sure you want to delete this trail post?"
     );
 
     if (!confirmDelete) return;
@@ -102,6 +104,13 @@ function TrailDetail() {
       setShowLoginPrompt(true);
       return;
     }
+
+    if (hasUserReported) {
+      setReportError("You have already reported this post.");
+      setReportSuccess("");
+      return;
+    }
+
     setReportError("");
     setReportSuccess("");
     setShowReportModal(true);
@@ -115,6 +124,11 @@ function TrailDetail() {
 
   async function handleReportSubmit(e) {
     e.preventDefault();
+
+    if (hasUserReported) {
+      setReportError("You have already reported this post.");
+      return;
+    }
 
     try {
       setReportLoading(true);
@@ -133,7 +147,7 @@ function TrailDetail() {
             reason: reportReason,
             message: reportMessage,
           }),
-        },
+        }
       );
 
       const data = await response.json();
@@ -145,6 +159,14 @@ function TrailDetail() {
       setTrail((prevTrail) => ({
         ...prevTrail,
         moderationStatus: "under_investigation",
+        reports: [
+          ...(prevTrail.reports || []),
+          {
+            reportedBy: currentUserId,
+            reason: reportReason,
+            message: reportMessage,
+          },
+        ],
       }));
 
       setReportMessage("");
@@ -174,10 +196,20 @@ function TrailDetail() {
     return <div className="dashboard-container">Loading...</div>;
   }
 
+  const currentUserId = user?.id || user?._id;
+
   const isOwner =
     user &&
     trail.user &&
-    (trail.user._id === user.id || trail.user === user.id);
+    (trail.user._id === currentUserId || trail.user === currentUserId);
+
+  const hasUserReported =
+    !!currentUserId &&
+    Array.isArray(trail.reports) &&
+    trail.reports.some((report) => {
+      const reportedById = report.reportedBy?._id || report.reportedBy;
+      return String(reportedById) === String(currentUserId);
+    });
 
   const moderationStatus = trail.moderationStatus || "active";
 
@@ -204,8 +236,14 @@ function TrailDetail() {
               <button
                 className="trail-action-button trail-action-report"
                 onClick={openReportModal}
+                disabled={hasUserReported}
+                title={
+                  hasUserReported
+                    ? "You have already reported this post."
+                    : "Report this post"
+                }
               >
-                Report
+                {hasUserReported ? "Already Reported" : "Report"}
               </button>
             </div>
           )
@@ -245,24 +283,28 @@ function TrailDetail() {
 
           <p className="trail-detail-description">{trail.description}</p>
 
-          {trail.tag && (() => {
-            const match = dataSet.find(
-              (t) => t.trailTitle.toLowerCase().trim() === trail.tag.toLowerCase().trim()
-            );
-            return (
-              <div className="trail-tag-group">
-                <div className="trail-detail-tag">{trail.tag}</div>
-                {match && (
-                  <button
-                    className="view-trail-button"
-                    onClick={() => navigate(`/trail-result/${match.id}`)}
-                  >
-                    View Trail
-                  </button>
-                )}
-              </div>
-            );
-          })()}
+          {trail.tag &&
+            (() => {
+              const match = dataSet.find(
+                (t) =>
+                  t.trailTitle.toLowerCase().trim() ===
+                  trail.tag.toLowerCase().trim()
+              );
+
+              return (
+                <div className="trail-tag-group">
+                  <div className="trail-detail-tag">{trail.tag}</div>
+                  {match && (
+                    <button
+                      className="view-trail-button"
+                      onClick={() => navigate(`/trail-result/${match.id}`)}
+                    >
+                      View Trail
+                    </button>
+                  )}
+                </div>
+              );
+            })()}
 
           {reportError && <p className="form-message error">{reportError}</p>}
           {reportSuccess && (
@@ -344,7 +386,7 @@ function TrailDetail() {
                 <button
                   type="submit"
                   className="report-submit-button"
-                  disabled={reportLoading}
+                  disabled={reportLoading || hasUserReported}
                 >
                   {reportLoading ? "Submitting..." : "Submit Report"}
                 </button>

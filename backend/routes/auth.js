@@ -1,96 +1,145 @@
 const express = require("express");
 const router = express.Router();
+
 const User = require("../models/User");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const Trail = require("../models/Trail");
+const auth = require("../middleware/auth");
+const authorizeRole = require("../middleware/authorizeRole");
 
-// REGISTER ROUTE
-router.post("/register", async (req, res) => {
+// USER: DELETE OWN ACCOUNT
+router.delete("/me", auth, async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const userId = req.user.id;
 
-    if (!username || !email || !password) {
-      return res.status(400).json({ error: "Username, email, and password are required" });
+    const existingUser = await User.findById(userId);
+    if (!existingUser) {
+      return res.status(404).json({ error: "User not found" });
     }
 
-    const existingUsername = await User.findOne({ username });
-    if (existingUsername) {
-      return res.status(400).json({ error: "Username is already taken" });
-    }
+    await Trail.deleteMany({ user: userId });
+    await User.findByIdAndDelete(userId);
 
-    const existingEmail = await User.findOne({ email });
-    if (existingEmail) {
-      return res.status(400).json({ error: "Email is already in use" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = new User({
-      username,
-      email,
-      password: hashedPassword,
-      role: "user",
-    });
-
-    await newUser.save();
-
-    res.status(201).json({
-      message: "Hiker registered successfully",
-      user: {
-        id: newUser._id,
-        username: newUser.username,
-        email: newUser.email,
-        role: newUser.role,
-      },
-    });
+    res.json({ message: "Your account and related trails were deleted successfully" });
   } catch (err) {
-    console.error("REGISTER ERROR:", err.message);
-    res.status(500).json({ error: "Server error during registration" });
+    console.error("DELETE /api/users/me error:", err.message);
+    res.status(500).json({ error: "Failed to delete account" });
   }
 });
 
-// LOGIN ROUTE
-router.post("/login", async (req, res) => {
+// ADMIN: GET ALL USERS
+router.get("/admin/users", auth, authorizeRole("admin"), async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const search = (req.query.search || "").trim();
+    const page = Math.max(parseInt(req.query.page || "1", 10), 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit || "20", 10), 1), 100);
+    const skip = (page - 1) * limit;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: "Email and password are required" });
-    }
+    const filter = search
+      ? {
+          $or: [
+            { username: { $regex: search, $options: "i" } },
+            { email: { $regex: search, $options: "i" } },
+          ],
+        }
+      : {};
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ error: "Hiker not found" });
-    }
+    const totalUsers = await User.countDocuments(filter);
+    const totalPages = Math.max(Math.ceil(totalUsers / limit), 1);
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ error: "Invalid credentials" });
-    }
-
-    const token = jwt.sign(
-      {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+    const users = await User.find(filter)
+      .select("-password")
+      .sort({ username: 1 })
+      .skip(skip)
+      .limit(limit);
 
     res.json({
-      token,
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
+      users,
+      pagination: {
+        page,
+        limit,
+        totalUsers,
+        totalPages,
       },
     });
   } catch (err) {
-    console.error("LOGIN ERROR:", err.message);
-    res.status(500).json({ error: "Server error during login" });
+    console.error("GET /api/users/admin/users error:", err.message);
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
+
+// ADMIN: SUSPEND / UNSUSPEND USER
+router.patch(
+  "/admin/users/:id/suspension",
+  auth,
+  authorizeRole("admin"),
+  async (req, res) => {
+    try {
+      const { suspended } = req.body;
+
+      if (typeof suspended !== "boolean") {
+        return res.status(400).json({ error: "Suspended must be true or false" });
+      }
+
+      const targetUser = await User.findById(req.params.id);
+      if (!targetUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      if (String(targetUser._id) === String(req.user.id)) {
+        return res.status(400).json({ error: "You cannot suspend your own account" });
+      }
+
+      if (targetUser.role === "admin") {
+        return res.status(403).json({ error: "You cannot suspend another admin" });
+      }
+
+      targetUser.suspended = suspended;
+      targetUser.suspendedAt = suspended ? new Date() : null;
+
+      await targetUser.save();
+
+      res.json({
+        message: suspended ? "User suspended successfully" : "User unsuspended successfully",
+        user: {
+          _id: targetUser._id,
+          username: targetUser.username,
+          email: targetUser.email,
+          role: targetUser.role,
+          suspended: targetUser.suspended,
+          suspendedAt: targetUser.suspendedAt,
+        },
+      });
+    } catch (err) {
+      console.error("PATCH /api/users/admin/users/:id/suspension error:", err.message);
+      res.status(500).json({ error: "Failed to update suspension status" });
+    }
+  }
+);
+
+// ADMIN: DELETE USER ACCOUNT
+router.delete("/admin/users/:id", auth, authorizeRole("admin"), async (req, res) => {
+  try {
+    const targetUser = await User.findById(req.params.id);
+
+    if (!targetUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (String(targetUser._id) === String(req.user.id)) {
+      return res.status(400).json({ error: "You cannot delete your own admin account here" });
+    }
+
+    if (targetUser.role === "admin") {
+      return res.status(403).json({ error: "You cannot delete another admin" });
+    }
+
+    await Trail.deleteMany({ user: targetUser._id });
+    await User.findByIdAndDelete(targetUser._id);
+
+    res.json({ message: "User and related trails deleted successfully" });
+  } catch (err) {
+    console.error("DELETE /api/users/admin/users/:id error:", err.message);
+    res.status(500).json({ error: "Failed to delete user" });
   }
 });
 

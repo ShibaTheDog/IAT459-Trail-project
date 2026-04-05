@@ -1,60 +1,48 @@
 const express = require("express");
 const router = express.Router();
+
 const Trail = require("../models/Trail");
-const verifyToken = require("../middleware/auth"); 
 const auth = require("../middleware/auth");
 const authorizeRole = require("../middleware/authorizeRole");
 
-// GET ROUTE: Open to visitors (Unauthenticated)
-// Anyone can view all the trails
+// GET ALL TRAILS
+// Public
 router.get("/", async (req, res) => {
   try {
-    const trails = await Trail.find().populate("user", "username"); // Grabs the creator's username
+    const trails = await Trail.find()
+      .populate("user", "username email")
+      .populate("reports.reportedBy", "username email");
+
     res.json(trails);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// GET A SINGLE TRAIL ROUTE: Open to visitors
-// This is the missing piece for your TrailDetail page!
-router.get("/:id", async (req, res) => {
+// ADMIN: GET REPORTED / FLAGGED TRAILS
+// Admin only
+router.get("/admin/reported", auth, authorizeRole("admin"), async (req, res) => {
   try {
-    const trail = await Trail.findById(req.params.id).populate(
-      "user",
-      "username",
-    );
+    const reportedTrails = await Trail.find({
+      $or: [
+        { moderationStatus: "under_investigation" },
+        { reports: { $exists: true, $not: { $size: 0 } } },
+      ],
+    })
+      .populate("user", "username email")
+      .populate("reports.reportedBy", "username email")
+      .sort({ _id: -1 });
 
-    if (!trail) {
-      return res.status(404).json({ message: "Trail not found" });
-    }
-
-    res.json(trail);
+    res.json(reportedTrails);
   } catch (err) {
-    console.error("Error fetching single trail:", err);
-    res.status(500).json({ error: "Server error fetching trail details" });
+    console.error("GET /api/trails/admin/reported error:", err.message);
+    res.status(500).json({ error: "Failed to fetch reported trails" });
   }
 });
 
-// POST ROUTE: Protected (Authenticated Members Only)
-// Notice 'verifyToken' is passed in before the async function!
-router.post("/", verifyToken, async (req, res) => {
-  try {
-    const newTrail = new Trail({
-      ...req.body,
-      user: req.user.id,
-    });
-
-    await newTrail.save();
-    res.status(201).json(newTrail);
-  } catch (err) {
-    console.error("TRAIL SAVE ERROR:", err);
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// DELETE ROUTE: Protected
-router.delete("/:id", verifyToken, async (req, res) => {
+// ADMIN: DELETE ANY TRAIL
+// Admin only
+router.delete("/admin/:id", auth, authorizeRole("admin"), async (req, res) => {
   try {
     const trail = await Trail.findById(req.params.id);
 
@@ -62,21 +50,115 @@ router.delete("/:id", verifyToken, async (req, res) => {
       return res.status(404).json({ error: "Trail not found" });
     }
 
-    // Check if the logged-in user owns the trail
+    await Trail.findByIdAndDelete(req.params.id);
+
+    res.json({ message: "Trail deleted successfully by admin" });
+  } catch (err) {
+    console.error("ADMIN DELETE TRAIL ERROR:", err.message);
+    res.status(500).json({ error: "Failed to delete trail" });
+  }
+});
+
+//ADMIN: Resolve a falsely flagged post
+//Admin only
+
+router.patch(
+  "/admin/:id/resolve",
+  auth,
+  authorizeRole("admin"),
+  async (req, res) => {
+    try {
+      const trail = await Trail.findById(req.params.id);
+
+      if (!trail) {
+        return res.status(404).json({ error: "Trail not found" });
+      }
+
+      trail.moderationStatus = "active";
+      trail.reports = [];
+
+      await trail.save();
+
+      res.json({
+        message: "Trail report resolved successfully",
+        trail,
+      });
+    } catch (err) {
+      console.error("ADMIN RESOLVE TRAIL ERROR:", err.message);
+      res.status(500).json({ error: "Failed to resolve trail report" });
+    }
+  }
+);
+
+// GET SINGLE TRAIL
+// Public
+router.get("/:id", async (req, res) => {
+  try {
+    const trail = await Trail.findById(req.params.id)
+      .populate("user", "username email")
+      .populate("reports.reportedBy", "username email");
+
+    if (!trail) {
+      return res.status(404).json({ error: "Trail not found" });
+    }
+
+    res.json(trail);
+  } catch (err) {
+    console.error("Error fetching single trail:", err.message);
+    res.status(500).json({ error: "Server error fetching trail details" });
+  }
+});
+
+// CREATE TRAIL
+// Logged-in users only
+router.post("/", auth, async (req, res) => {
+  try {
+    const newTrail = new Trail({
+      ...req.body,
+      user: req.user.id,
+    });
+
+    await newTrail.save();
+
+    const savedTrail = await Trail.findById(newTrail._id).populate(
+      "user",
+      "username email"
+    );
+
+    res.status(201).json(savedTrail);
+  } catch (err) {
+    console.error("TRAIL SAVE ERROR:", err.message);
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// DELETE OWN TRAIL
+// Logged-in owner only
+router.delete("/:id", auth, async (req, res) => {
+  try {
+    const trail = await Trail.findById(req.params.id);
+
+    if (!trail) {
+      return res.status(404).json({ error: "Trail not found" });
+    }
+
     if (trail.user.toString() !== req.user.id) {
-      return res.status(403).json({ error: "You are not authorized to delete this trail" });
+      return res
+        .status(403)
+        .json({ error: "You are not authorized to delete this trail" });
     }
 
     await Trail.findByIdAndDelete(req.params.id);
 
     res.json({ message: "Trail successfully deleted" });
   } catch (err) {
-    console.error("DELETE ERROR:", err);
+    console.error("DELETE ERROR:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-// POST ROUTE: User is reported
+// REPORT A TRAIL
+// Logged-in users only
 router.post("/:id/report", auth, async (req, res) => {
   try {
     const { reason, message } = req.body;
@@ -96,12 +178,17 @@ router.post("/:id/report", auth, async (req, res) => {
       return res.status(400).json({ error: "You cannot report your own post" });
     }
 
-    const alreadyReported = trail.reports.some(
-      (report) => report.reportedBy.toString() === userId.toString()
-    );
+    const alreadyReported = Array.isArray(trail.reports)
+      ? trail.reports.some((report) => {
+          const reportedById = report.reportedBy?._id || report.reportedBy;
+          return String(reportedById) === String(userId);
+        })
+      : false;
 
     if (alreadyReported) {
-      return res.status(400).json({ error: "You have already reported this post" });
+      return res
+        .status(400)
+        .json({ error: "You have already reported this post" });
     }
 
     trail.reports.push({
@@ -120,56 +207,5 @@ router.post("/:id/report", auth, async (req, res) => {
     res.status(500).json({ error: "Failed to submit report" });
   }
 });
-
-// GET ROUTE: Retrieves reported posts through admin view
-router.get(
-  "/admin/reported",
-  auth,
-  authorizeRole("admin"),
-  async (req, res) => {
-    try {
-      const reportedTrails = await Trail.find({
-        $or: [
-          { moderationStatus: "under_investigation" },
-          { reports: { $exists: true, $not: { $size: 0 } } },
-        ],
-      })
-        .populate("user", "username email")
-        .populate("reports.reportedBy", "username email")
-        .sort({ updatedAt: -1, _id: -1 });
-
-      res.json(reportedTrails);
-    } catch (err) {
-      console.error("GET /api/trails/admin/reported error:", err.message);
-      res.status(500).json({ error: "Failed to fetch reported trails" });
-    }
-  }
-);
-
-// DELETE ROUTE: Admin force deletes a post that is offensive (hopefully)
-router.delete(
-  "/admin/:id",
-  auth,
-  authorizeRole("admin"),
-  async (req, res) => {
-    try {
-      const trail = await Trail.findById(req.params.id);
-
-      if (!trail) {
-        return res.status(404).json({ error: "Trail not found" });
-      }
-
-      await Trail.findByIdAndDelete(req.params.id);
-
-      res.json({ message: "Trail deleted successfully by admin" });
-    } catch (err) {
-      console.error("ADMIN DELETE TRAIL ERROR:", err.message);
-      res.status(500).json({ error: "Failed to delete trail" });
-    }
-  }
-);
-
-
-
 
 module.exports = router;

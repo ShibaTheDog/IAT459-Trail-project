@@ -573,4 +573,32 @@
   border-color: #038220;
   color: #038220;
   background-color: #fff;
+.trail-result-full-width {
+  width: 100%;
+}
+
+.trail-card-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.trail-card-username {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.trail-card-investigation-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #b26a00;
+  background-color: #fff8e1;
+  border: 1px solid #b26a00;
 }

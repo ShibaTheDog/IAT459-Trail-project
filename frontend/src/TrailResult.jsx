@@ -22,7 +22,10 @@ function TrailResult() {
     return (
       <div className="dashboard-container">
         <h2>Trail Not Found</h2>
-        <button className="profile-back-button" onClick={() => navigate("/dashboard")}>
+        <button
+          className="profile-back-button"
+          onClick={() => navigate("/dashboard")}
+        >
           &#8592; Back
         </button>
       </div>
@@ -45,7 +48,7 @@ function TrailResult() {
       </div>
 
       <div className="trail-detail-container">
-        <div className="trail-detail-info-section">
+        <div className="trail-detail-info-section trail-result-full-width">
           <h1 className="trail-detail-title">{trail.trailTitle}</h1>
 
           <div className="trail-stats-grid">
@@ -126,11 +129,30 @@ function TrailResult() {
                 className="trail-card"
                 onClick={() => navigate(`/trail/${post._id}`)}
               >
-                {post.imgUrl && <img src={post.imgUrl} alt={post.title} />}
+                {post.imgUrl ? (
+                  <img src={post.imgUrl} alt={post.title} />
+                ) : (
+                  <div className="no-image-container">No Image</div>
+                )}
+
                 <div className="trail-info">
                   <h3>{post.title}</h3>
-                  {post.user?.username && (
-                    <p className="trail-card-username">{post.user.username}</p>
+
+                  {(post.user?.username ||
+                    post.moderationStatus === "under_investigation") && (
+                    <div className="trail-card-meta-row">
+                      {post.user?.username && (
+                        <p className="trail-card-username">
+                          {post.user.username}
+                        </p>
+                      )}
+
+                      {post.moderationStatus === "under_investigation" && (
+                        <span className="trail-card-investigation-badge">
+                          Under Investigation
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
