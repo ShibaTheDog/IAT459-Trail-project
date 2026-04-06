@@ -208,4 +208,37 @@ router.post("/:id/report", auth, async (req, res) => {
   }
 });
 
+
+//Admin view that can retrieve posts from a certain user: 
+//GET: ADMIN ONLY
+
+
+router.get(
+  "/admin/user/:userId/posts",
+  auth,
+  authorizeRole("admin"),
+  async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const search = (req.query.search || "").trim();
+
+      const filter = { user: userId };
+
+      if (search) {
+        filter.title = { $regex: search, $options: "i" };
+      }
+
+      const trails = await Trail.find(filter)
+        .populate("user", "username email")
+        .sort({ _id: -1 });
+
+      res.json(trails);
+    } catch (err) {
+      console.error("GET admin user posts error:", err.message);
+      res.status(500).json({ error: "Failed to fetch user posts" });
+    }
+  }
+);
+
+
 module.exports = router;

@@ -15,32 +15,41 @@ function Register() {
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
+  e.preventDefault();
+  setError("");
+  setSuccess("");
 
-    try {
-      const res = await fetch("http://localhost:5000/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password }),
-      });
+  try {
+    const res = await fetch("http://localhost:5000/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, email, password }),
+    });
 
-      const data = await res.json();
+    const contentType = res.headers.get("content-type");
 
-      if (res.ok) {
-        setSuccess("Registration successful! Please log in.");
-        setTimeout(() => {
-          navigate("/login");
-        }, 1000);
-      } else {
-        setError(data.message || data.error || "Registration failed");
-      }
-    } catch (err) {
-      console.error(err);
-      setError("An error occurred. Please try again.");
+    if (!contentType || !contentType.includes("application/json")) {
+      const text = await res.text();
+      throw new Error(
+        `Expected JSON but got: ${text.substring(0, 120)}`
+      );
     }
-  };
+
+    const data = await res.json();
+
+    if (res.ok) {
+      setSuccess("Registration successful! Please log in.");
+      setTimeout(() => {
+        navigate("/login");
+      }, 1000);
+    } else {
+      setError(data.message || data.error || "Registration failed");
+    }
+  } catch (err) {
+    console.error(err);
+    setError(err.message || "An error occurred. Please try again.");
+  }
+};
 
   return (
     <div className="auth-page-container">
