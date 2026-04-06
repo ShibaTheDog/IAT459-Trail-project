@@ -21,6 +21,7 @@ import ProtectedAdminRoute from "./ProtectedAdminRoute";
 import Navbar from "./Navbar";
 import Moments from "./Moments";
 import AdminUserPosts from "./AdminUserPosts";
+import UserMoments from "./UserMoments";
 
 function AppContent() {
   const location = useLocation();
@@ -49,6 +50,7 @@ function AppContent() {
           <Route path="/trail-result/:id" element={<TrailResult />} />
           <Route path="/moments" element={<Moments />} />
           <Route path="/profile" element={<Profile />} />{" "}
+          <Route path="/user-moments/:userId" element={<UserMoments />} />
           {/* probably needs to be protected or something*/}
           <Route
             path="/create-post"

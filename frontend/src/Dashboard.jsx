@@ -320,7 +320,13 @@ function Dashboard() {
                   <div className="trail-info">
                     <h3>{trail.title}</h3>
                     {trail.user?.username && (
-                      <p className="trail-card-username">
+                      <p
+                        className="trail-card-username"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent parent click
+                          navigate(`/user-moments/${trail.user._id || trail.user.id}`);
+                        }}
+                      >
                         {trail.user.username}
                       </p>
                     )}
