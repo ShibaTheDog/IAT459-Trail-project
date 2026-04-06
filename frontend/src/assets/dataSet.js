@@ -43,7 +43,9 @@ export const dataSet = [
     "season": "year-round",
     "camping": false,
     "publicTransit": true,
-    "dogFriendly": true
+    "dogFriendly": true,
+    "lat": 49.3570047,
+    "lng": -123.1115365
   },
   {
     "id": "36ea330e053211ec9f58cf7d0294de9c",
@@ -57,7 +59,9 @@ export const dataSet = [
     "season": "year-round",
     "camping": false,
     "publicTransit": true,
-    "dogFriendly": true
+    "dogFriendly": true,
+    "lat": 49.327339,
+    "lng": -123.1355446
   },
   {
     "id": "36ef97b8053211ec9f58cf7d0294de9c",
@@ -71,7 +75,9 @@ export const dataSet = [
     "season": "April-November",
     "camping": false,
     "publicTransit": false,
-    "dogFriendly": true
+    "dogFriendly": true,
+    "lat": 49.2745466,
+    "lng": -122.2150243
   },
   {
     "id": "36f53e7a053211ec9f58cf7d0294de9c",
@@ -85,7 +91,9 @@ export const dataSet = [
     "season": "year-round",
     "camping": false,
     "publicTransit": false,
-    "dogFriendly": true
+    "dogFriendly": true,
+    "lat": 49.4405335,
+    "lng": -123.7236095
   },
   {
     "id": "36fae776053211ec9f58cf7d0294de9c",
@@ -99,7 +107,9 @@ export const dataSet = [
     "season": "April-October",
     "camping": false,
     "publicTransit": false,
-    "dogFriendly": true
+    "dogFriendly": true,
+    "lat": 49.8816799,
+    "lng": -123.1814208
   },
   {
     "id": "36fbc77c053211ec9f58cf7d0294de9c",
@@ -113,7 +123,9 @@ export const dataSet = [
     "season": "May-November",
     "camping": true,
     "publicTransit": false,
-    "dogFriendly": false
+    "dogFriendly": false,
+    "lat": 50.0371491,
+    "lng": -123.1328301
   },
   {
     "id": "37020560053211ec9f58cf7d0294de9c",
@@ -127,7 +139,9 @@ export const dataSet = [
     "season": "year-round",
     "camping": false,
     "publicTransit": false,
-    "dogFriendly": false
+    "dogFriendly": false,
+    "lat": 49.20999587288099,
+    "lng": -121.71041728102038
   },
   {
     "id": "370e6e7c053211ec9f58cf7d0294de9c",
@@ -141,7 +155,9 @@ export const dataSet = [
     "season": "Febuary-November",
     "camping": false,
     "publicTransit": false,
-    "dogFriendly": true
+    "dogFriendly": true,
+    "lat": 49.1491212422811,
+    "lng": -121.79211514656323
   },
   {
     "id": "37213304053211ec9f58cf7d0294de9c",
@@ -155,7 +171,9 @@ export const dataSet = [
     "season": "year-round",
     "camping": false,
     "publicTransit": false,
-    "dogFriendly": true
+    "dogFriendly": true,
+    "lat": 49.4306167141234,
+    "lng": -123.64164827538782
   },
   {
     "id": "3721d426053211ec9f58cf7d0294de9c",
@@ -185,7 +203,9 @@ export const dataSet = [
     "season": "year-round",
     "camping": false,
     "publicTransit": true,
-    "dogFriendly": true
+    "dogFriendly": true,
+    "lat": 49.23378280474075,
+    "lng": -122.80993122883561
   },
   {
     "id": "3731fd42053211ec9f58cf7d0294de9c",
@@ -199,7 +219,9 @@ export const dataSet = [
     "season": "June-September",
     "camping": false,
     "publicTransit": false,
-    "dogFriendly": false
+    "dogFriendly": false,
+    "lat": 50.21333732389916,
+    "lng": -123.19707927135678
   },
   {
     "id": "373bb378053211ec9f58cf7d0294de9c",
@@ -213,7 +235,9 @@ export const dataSet = [
     "season": "April-October",
     "camping": false,
     "publicTransit": false,
-    "dogFriendly": true
+    "dogFriendly": true,
+    "lat": 50.76229207732901,
+    "lng": -122.78045544393852
   },
   {
     "id": "3741060c053211ec9f58cf7d0294de9c",
@@ -227,7 +251,9 @@ export const dataSet = [
     "season": "year-round",
     "camping": false,
     "publicTransit": true,
-    "dogFriendly": true
+    "dogFriendly": true,
+    "lat": 49.279144788750116,
+    "lng": -122.81462994232872
   },
   {
     "id": "37459636053211ec9f58cf7d0294de9c",
@@ -269,7 +295,9 @@ export const dataSet = [
     "season": "July-October",
     "camping": false,
     "publicTransit": true,
-    "dogFriendly": false
+    "dogFriendly": false,
+    "lat": 49.41267252046405,
+    "lng": -123.09177321945866
   },
   {
     "id": "37570d08053211ec9f58cf7d0294de9c",

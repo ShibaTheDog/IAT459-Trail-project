@@ -20,7 +20,11 @@ function Dashboard() {
     useState(false);
   const [isDogFriendlyDropdownOpen, setIsDogFriendlyDropdownOpen] =
     useState(false);
-  const [dogFriendlyFilter, setDogFriendlyFilter] = useState("all");
+  // const [dogFriendlyFilter, setDogFriendlyFilter] = useState("all");
+  const [showDogFriendly, setShowDogFriendly] = 
+    useState(true);
+  const [showNotDogFriendly, setShowNotDogFriendly] = 
+    useState(true);
   const [isDistanceDropdownOpen, setIsDistanceDropdownOpen] = useState(false);
   const [minDistance, setMinDistance] = useState(0);
   const [maxDistance, setMaxDistance] = useState(30);
@@ -50,7 +54,9 @@ function Dashboard() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [showOnlyWithPosts, setShowOnlyWithPosts] = useState(false);
+  // const [showOnlyWithPosts, setShowOnlyWithPosts] = useState(false);
+  const [showWithPosts, setShowWithPosts] = useState(true);
+  const [showWithoutPosts, setShowWithoutPosts] = useState(true);
 
   const searchWrapperRef = useRef(null);
 
@@ -93,17 +99,32 @@ function Dashboard() {
         trail.region.toLowerCase().includes(q),
     );
 
-    if (showOnlyWithPosts) {
-      filtered = filtered.filter((trail) =>
-        trails.some(
-          (post) =>
-            !isTrailFlagged(post) &&
-            post.tag &&
-            post.tag.toLowerCase().trim() ===
-              trail.trailTitle.toLowerCase().trim(),
-        ),
+
+    // if (showOnlyWithPosts) {
+    //   filtered = filtered.filter((trail) =>
+    //     trails.some(
+    //       (post) =>
+    //         !isTrailFlagged(post) &&
+    //         post.tag &&
+    //         post.tag.toLowerCase().trim() ===
+    //           trail.trailTitle.toLowerCase().trim(),
+    //     ),
+    //   );
+    // }
+    filtered = filtered.filter((trail) => {
+      const hasPost = trails.some(
+        (post) =>
+          !isTrailFlagged(post) &&
+          post.tag &&
+          post.tag.toLowerCase().trim() ===
+            trail.trailTitle.toLowerCase().trim()
       );
-    }
+
+      if (hasPost && !showWithPosts) return false;
+      if (!hasPost && !showWithoutPosts) return false;
+
+      return true;
+    });
 
     setSearchResults(filtered.slice(0, 8));
   }
@@ -179,7 +200,7 @@ function Dashboard() {
                       setIsPostFilterDropdownOpen(!isPostFilterDropdownOpen)
                     }
                   >
-                    Trail
+                    Filter
                     <span
                       className={`dropdown-arrow ${isPostFilterDropdownOpen ? "open" : ""}`}
                     >
@@ -187,7 +208,7 @@ function Dashboard() {
                     </span>
                   </button>
 
-                  {isPostFilterDropdownOpen && (
+                  {/* {isPostFilterDropdownOpen && (
                     <div className="search-filter-dropdown">
                       <label className="dropdown-item">
                         <input
@@ -201,6 +222,7 @@ function Dashboard() {
                         />
                         All Trails
                       </label>
+
                       <label className="dropdown-item">
                         <input
                           type="radio"
@@ -212,6 +234,28 @@ function Dashboard() {
                           }}
                         />
                         Only With Posts
+                      </label>
+                    </div>
+                  )} */}
+                  
+                  {isPostFilterDropdownOpen && (
+                    <div className="search-filter-dropdown">
+                      <label className="dropdown-item">
+                        <input
+                          type="checkbox"
+                          checked={showWithPosts}
+                          onChange={() => setShowWithPosts(!showWithPosts)}
+                        />
+                        With Posts
+                      </label>
+
+                      <label className="dropdown-item">
+                        <input
+                          type="checkbox"
+                          checked={showWithoutPosts}
+                          onChange={() => setShowWithoutPosts(!showWithoutPosts)}
+                        />
+                        Without Posts
                       </label>
                     </div>
                   )}
@@ -451,27 +495,20 @@ function Dashboard() {
                   <div className="dropdown-menu">
                     <label className="dropdown-item">
                       <input
-                        type="radio"
-                        name="dogFilter"
-                        checked={dogFriendlyFilter === "yes"}
-                        onChange={() => {
-                          setDogFriendlyFilter("yes");
-                          setIsDogFriendlyDropdownOpen(false);
-                        }}
+                        type="checkbox"
+                        checked={showDogFriendly}
+                        onChange={() => setShowDogFriendly(!showDogFriendly)}
                       />
-                      Yes
+                      Dog Friendly
                     </label>
+
                     <label className="dropdown-item">
                       <input
-                        type="radio"
-                        name="dogFilter"
-                        checked={dogFriendlyFilter === "no"}
-                        onChange={() => {
-                          setDogFriendlyFilter("no");
-                          setIsDogFriendlyDropdownOpen(false);
-                        }}
+                        type="checkbox"
+                        checked={showNotDogFriendly}
+                        onChange={() => setShowNotDogFriendly(!showNotDogFriendly)}
                       />
-                      No
+                      Not Dog Friendly
                     </label>
                   </div>
                 )}
@@ -545,10 +582,8 @@ function Dashboard() {
                     return false;
                   if (trail.difficulty === "Difficult" && !showDifficult)
                     return false;
-                  if (dogFriendlyFilter === "yes" && !trail.dogFriendly)
-                    return false;
-                  if (dogFriendlyFilter === "no" && trail.dogFriendly)
-                    return false;
+                  if (trail.dogFriendly && !showDogFriendly) return false;
+                  if (!trail.dogFriendly && !showNotDogFriendly) return false;
                   if (
                     trail.tripTime < minDistance ||
                     trail.tripTime > maxDistance
