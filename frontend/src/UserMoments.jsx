@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "./stylesheets/dashboard.css";
 import "./stylesheets/moments.css";
 
-function Moments() {
+function UserMoments() {
   const [trails, setTrails] = useState([]);
   const navigate = useNavigate();
+  const { userId } = useParams();
 
   useEffect(() => {
     fetch("http://localhost:5000/api/trails")
@@ -18,23 +19,31 @@ function Moments() {
     trail.moderationStatus === "under_investigation" ||
     trail.moderationStatus === "removed";
 
-  const allMoments = trails.filter((trail) => !isTrailFlagged(trail));
+  // ✅ ONLY CHANGE: filter by userId
+  const userMoments = trails.filter(
+    (trail) =>
+      !isTrailFlagged(trail) &&
+      trail.user?._id === userId
+  );
+
+  const username = userMoments[0]?.user?.username || "User";
 
   return (
     <div className="moments-page-container">
       <div className="moments-page-header">
-        <h1>All Moments</h1>
+        <button onClick={() => navigate(-1)}>← Back</button>
+        <h1>{username}'s Moments</h1>
       </div>
 
-      {allMoments.length === 0 ? (
+      {userMoments.length === 0 ? (
         <div className="empty-state">
           <p>
-            <strong>No moments shared yet.</strong>
+            <strong>No moments from this user yet.</strong>
           </p>
         </div>
       ) : (
         <div className="trails-grid trails-grid-4col">
-          {allMoments.map((trail) => (
+          {userMoments.map((trail) => (
             <div
               key={trail._id || trail.id}
               className="trail-card"
@@ -45,16 +54,11 @@ function Moments() {
               ) : (
                 <div className="no-image-container">No Image</div>
               )}
+
               <div className="trail-info">
                 <h3>{trail.title}</h3>
                 {trail.user?.username && (
-                  <p
-                    className="trail-card-username"
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent parent click
-                      navigate(`/user-moments/${trail.user._id || trail.user.id}`);
-                    }}
-                  >
+                  <p className="trail-card-username">
                     {trail.user.username}
                   </p>
                 )}
@@ -67,4 +71,4 @@ function Moments() {
   );
 }
 
-export default Moments;
+export default UserMoments;

@@ -236,12 +236,19 @@ function TrailDetail() {
 
         <div className="trail-detail-info-section">
           <div className="post-author-header">
-            <div className="post-author-avatar">
-              {trail.user?.username?.charAt(0).toUpperCase() ?? "?"}
+            <div
+              className="post-author-info"
+              onClick={() => navigate(`/user-moments/${trail.user?._id}`)}
+              style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
+            >
+              <div className="post-author-avatar">
+                {trail.user?.username?.charAt(0).toUpperCase() ?? "?"}
+              </div>
+
+              <span className="post-author-name">
+                {trail.user?.username ?? "Unknown"}
+              </span>
             </div>
-            <span className="post-author-name">
-              {trail.user?.username ?? "Unknown"}
-            </span>
             <div className="post-author-actions">
               {user?.role === "admin" ? (
                 <button
