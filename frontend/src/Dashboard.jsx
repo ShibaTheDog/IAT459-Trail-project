@@ -59,6 +59,11 @@ function Dashboard() {
   const [showWithoutPosts, setShowWithoutPosts] = useState(true);
 
   const searchWrapperRef = useRef(null);
+  const mapOptions = {
+    mapTypeControl: false,  
+    fullscreenControl: false,
+    streetViewControl: false,
+  };
 
   useEffect(() => {
     fetch("http://localhost:5000/api/trails")
@@ -570,6 +575,7 @@ function Dashboard() {
               mapContainerStyle={containerStyle}
               center={mapCenter}
               zoom={8}
+              options={mapOptions}
               onIdle={(map) => {
                 const c = map.getCenter();
                 setMapCenter({ lat: c.lat(), lng: c.lng() });
