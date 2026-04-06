@@ -20,6 +20,7 @@ import AdminModeration from "./adminModeration";
 import ProtectedAdminRoute from "./ProtectedAdminRoute";
 import Navbar from "./Navbar";
 import Moments from "./Moments";
+import AdminUserPosts from "./AdminUserPosts";
 
 function AppContent() {
   const location = useLocation();
@@ -55,6 +56,14 @@ function AppContent() {
               <ProtectedRoute>
                 <TrailForm />
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users/:userId/posts"
+            element={
+              <ProtectedAdminRoute>
+                <AdminUserPosts />
+              </ProtectedAdminRoute>
             }
           />
           <Route

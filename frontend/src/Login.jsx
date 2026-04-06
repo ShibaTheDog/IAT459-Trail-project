@@ -18,30 +18,37 @@ function Login() {
 
   const navigate = useNavigate();
 
-  async function handleLogin(e) {
-    e.preventDefault();
-    setError("");
+ async function handleLogin(e) {
+  e.preventDefault();
+  setError("");
 
-    try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+  try {
+    const res = await fetch("http://localhost:5000/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
 
-      const data = await res.json();
+    const contentType = res.headers.get("content-type");
 
-      if (res.ok) {
-        login(data.token);
-        navigate("/Dashboard");
-      } else {
-        setError(data.message || "Login failed");
-      }
-    } catch (err) {
-      console.error(err);
-      setError("An error occurred. Please try again later.");
+    if (!contentType || !contentType.includes("application/json")) {
+      const text = await res.text();
+      throw new Error(`Expected JSON but got: ${text.substring(0, 120)}`);
     }
+
+    const data = await res.json();
+
+    if (res.ok) {
+      login(data.token);
+      navigate("/dashboard");
+    } else {
+      setError(data.error || data.message || "Login failed");
+    }
+  } catch (err) {
+    console.error(err);
+    setError(err.message || "An error occurred. Please try again later.");
   }
+}
 
   return (
     <div className="auth-page-container">
