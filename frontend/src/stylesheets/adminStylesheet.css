@@ -28,8 +28,9 @@
 }
 
 .admin-back-button:hover {
-  background-color: #d9d9d9;
-  color: #000;
+  border-color: #038220;
+  color: #038220;
+  background-color: #fff;
 }
 
 /* ── Page title row ── */
@@ -81,9 +82,9 @@
 }
 
 .admin-nav-tab.active {
-  background-color: #5a75f0;
+  background-color: #038220;
   color: white;
-  border-color: #5a75f0;
+  border-color: #038220;
 }
 
 /* ── Loading / error / empty ── */
@@ -676,6 +677,21 @@
 .admin-modal-confirm-button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
+}
+
+.admin-modal-delete-button {
+  background-color: #b64e4e;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-modal-delete-button:hover {
+  background-color: #a03d3d;
 }
 
 .admin-view-user-posts-button {

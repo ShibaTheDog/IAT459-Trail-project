@@ -29,8 +29,9 @@
 
 .back-button-container .logout-button:hover,
 .profile-back-button:hover {
-  background-color: #d9d9d9;
-  color: #000;
+  border-color: #038220;
+  color: #038220;
+  background-color: #fff;
 }
 
 .trail-detail-container {
@@ -56,7 +57,6 @@
   align-items: flex-end;
   z-index: 10;
 }
-
 
 .login-prompt-overlay {
   position: fixed;
@@ -150,6 +150,8 @@
 
 .trail-action-report:hover {
   background-color: #fdf0f0;
+  border-color: #7b1c1c;
+  color: #7b1c1c;
 }
 
 .trail-action-delete {
@@ -196,6 +198,18 @@
   margin-bottom: 12px;
 }
 
+.post-author-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.post-author-info:hover .post-author-name {
+  color: #038220;
+}
+
 .post-author-actions {
   margin-left: auto;
 }
@@ -222,10 +236,10 @@
 
 .trail-title-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
-  flex-wrap: wrap;
-  margin-top: -1rem;
+  margin-top: 0;
+  margin-bottom: 4px;
 }
 
 .trail-detail-title {
@@ -235,14 +249,29 @@
   margin-top: 0;
   margin-bottom: 0;
   line-height: 1.2;
+  flex: 1;
+}
+
+.trail-detail-username {
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+  color: #666;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.trail-detail-username:hover {
+  color: #038220;
+  text-decoration: none;
 }
 
 .title-status-badge {
   display: inline-block;
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 700;
+  align-self: flex-start;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -380,6 +409,12 @@
   font-size: 1.2rem;
   color: #777;
   margin: 2px 0 6px 0;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.trail-card-username:hover {
+  color: #038220;
 }
 
 .no-image-container {
@@ -604,6 +639,12 @@
   font-size: 0.95rem;
   color: #666;
   font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.trail-card-username:hover {
+  color: #038220;
 }
 
 .trail-card-investigation-badge {

@@ -129,47 +129,30 @@ function TrailResult() {
                 className="trail-card"
                 onClick={() => navigate(`/trail/${post._id}`)}
               >
-                {/* AUTHOR ROW */}
-                <div className="trail-card-author-row">
-                  <div
-                    className="post-author-info"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/user-moments/${post.user?._id}`);
-                    }}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <div className="post-author-avatar trail-card-avatar">
-                      {post.user?.username?.charAt(0).toUpperCase() ?? "?"}
-                    </div>
-
-                    <span className="post-author-name">
-                      {post.user?.username ?? "Unknown"}
-                    </span>
-                  </div>
-
-                  {post.moderationStatus === "under_investigation" && (
-                    <span className="trail-card-investigation-badge">
-                      Under Investigation
-                    </span>
-                  )}
-                </div>
-
-                {/* IMAGE */}
                 {post.imgUrl ? (
                   <img src={post.imgUrl} alt={post.title} />
                 ) : (
                   <div className="no-image-container">No Image</div>
                 )}
 
-                {/* TITLE */}
                 <div className="trail-info">
                   <h3>{post.title}</h3>
+                  {post.user?.username && (
+                    <p
+                      className="trail-card-username"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/user-moments/${post.user?._id}`);
+                      }}
+                    >
+                      {post.user.username}
+                    </p>
+                  )}
+                  {post.moderationStatus === "under_investigation" && (
+                    <span className="trail-card-investigation-badge">
+                      Under Investigation
+                    </span>
+                  )}
                 </div>
               </div>
             ))}

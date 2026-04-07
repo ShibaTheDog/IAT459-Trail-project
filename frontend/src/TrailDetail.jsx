@@ -239,16 +239,16 @@ function TrailDetail() {
             <div
               className="post-author-info"
               onClick={() => navigate(`/user-moments/${trail.user?._id}`)}
-              style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
+              style={{ textDecoration: "none" }}
             >
               <div className="post-author-avatar">
                 {trail.user?.username?.charAt(0).toUpperCase() ?? "?"}
               </div>
-
               <span className="post-author-name">
                 {trail.user?.username ?? "Unknown"}
               </span>
             </div>
+
             <div className="post-author-actions">
               {user?.role === "admin" ? (
                 <button
@@ -279,13 +279,13 @@ function TrailDetail() {
 
           <div className="trail-title-row">
             <h1 className="trail-detail-title">{trail.title}</h1>
-
-            {moderationStatus === "under_investigation" && (
-              <span className="title-status-badge under-investigation">
-                Under Investigation
-              </span>
-            )}
           </div>
+
+          {moderationStatus === "under_investigation" && (
+            <span className="title-status-badge under-investigation">
+              Under Investigation
+            </span>
+          )}
 
           <p className="trail-detail-description">{trail.description}</p>
 

@@ -31,8 +31,9 @@
 }
 
 .profile-back-button:hover {
-  background-color: #d9d9d9;
-  color: #000;
+  border-color: #038220;
+  color: #038220;
+  background-color: #fff;
 }
 
 .profile-nav-actions {

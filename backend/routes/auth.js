@@ -56,15 +56,20 @@ router.post("/register", async (req, res) => {
 // LOGIN ROUTE
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { identifier, password } = req.body;
 
-    if (!email || !password) {
+    if (!identifier || !password) {
       return res
         .status(400)
-        .json({ error: "Email and password are required" });
+        .json({ error: "Email/username and password are required" });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({
+      $or: [
+        { email: identifier.toLowerCase() },
+        { username: identifier },
+      ],
+    });
     if (!user) {
       return res.status(404).json({ error: "Hiker not found" });
     }

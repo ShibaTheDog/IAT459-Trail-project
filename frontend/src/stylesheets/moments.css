@@ -5,6 +5,10 @@
   box-sizing: border-box;
 }
 
+.moments-back-row {
+  margin-bottom: 20px;
+}
+
 .moments-page-header {
   margin-bottom: 36px;
 }
@@ -20,3 +24,20 @@
   font-size: 1rem;
   color: #666;
 }
+
+.trail-card-image-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px 8px 0 0;
+}
+
+.trail-card-image-wrapper img {
+  display: block;
+  width: 100%;
+}
+
+.trail-card-img-blurred {
+  filter: blur(20px);
+  transform: scale(1.15);
+}
+

@@ -91,17 +91,14 @@ function TrailForm() {
   };
 
   return (
-    <div className="dashboard-container">
-      <div className="back-button-container form-back-button-container">
-        <button
-          className="profile-back-button"
-          onClick={() => navigate(-1)}
-        >
+    <div className="dashboard-page">
+      <div className="back-button-container">
+        <button className="profile-back-button" onClick={() => navigate(-1)}>
           &#8592; Back
         </button>
       </div>
 
-      <div className="trail-form-section">
+      <div className="trail-detail-container">
         <div
           className={`image-droparea ${!user ? "disabled" : ""}`}
           onDrop={handleDrop}
@@ -130,62 +127,66 @@ function TrailForm() {
           />
         </div>
 
-        <form className="trail-form" onSubmit={handleSubmit}>
-          <div className="input-group">
-            <label>Title</label>
-            <input
-              name="title"
-              placeholder="Add a title"
-              value={formData.title}
-              onChange={handleChange}
-              disabled={!user}
-              required
-            />
-          </div>
+        <div className="trail-detail-info-section">
+          <h1 className="trail-detail-title">Create Your Post</h1>
 
-          <div className="input-group">
-            <label>Description</label>
-            <input
-              name="description"
-              placeholder="Add a description"
-              value={formData.description}
-              onChange={handleChange}
-              disabled={!user}
-              required
-            />
-          </div>
-
-          <div className="input-group">
-            <label>Select Trail</label>
-            <div className="trail-select-wrapper">
+          <form className="trail-form" onSubmit={handleSubmit}>
+            <div className="input-group">
+              <label>Title</label>
               <input
-                type="text"
-                placeholder="Search for a trail you hiked..."
-                value={searchQuery}
-                onChange={handleSearch}
-                className={`trail-select-input${preselectedTrail ? " trail-select-input--preselected" : ""}`}
-                disabled={!user || !!preselectedTrail}
+                name="title"
+                placeholder="Add a title"
+                value={formData.title}
+                onChange={handleChange}
+                disabled={!user}
+                required
               />
-              {searchResults.length > 0 && (
-                <div className="search-dropdown">
-                  {searchResults.map((trail) => (
-                    <div
-                      key={trail.id}
-                      className="search-result-item"
-                      onClick={() => selectTrail(trail)}
-                    >
-                      {trail.trailTitle}
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
-          </div>
 
-          <button type="submit" className="submit-button" disabled={!user}>
-            Submit
-          </button>
-        </form>
+            <div className="input-group">
+              <label>Description</label>
+              <input
+                name="description"
+                placeholder="Add a description"
+                value={formData.description}
+                onChange={handleChange}
+                disabled={!user}
+                required
+              />
+            </div>
+
+            <div className="input-group">
+              <label>Select Trail</label>
+              <div className="trail-select-wrapper">
+                <input
+                  type="text"
+                  placeholder="Search for a trail you hiked..."
+                  value={searchQuery}
+                  onChange={handleSearch}
+                  className={`trail-select-input${preselectedTrail ? " trail-select-input--preselected" : ""}`}
+                  disabled={!user || !!preselectedTrail}
+                />
+                {searchResults.length > 0 && (
+                  <div className="search-dropdown">
+                    {searchResults.map((trail) => (
+                      <div
+                        key={trail.id}
+                        className="search-result-item"
+                        onClick={() => selectTrail(trail)}
+                      >
+                        {trail.trailTitle}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <button type="submit" className="submit-button" disabled={!user}>
+              Submit
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

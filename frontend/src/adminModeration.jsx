@@ -35,6 +35,23 @@ function AdminModeration() {
   const [suspensionDays, setSuspensionDays] = useState("7");
   const [suspensionModalError, setSuspensionModalError] = useState("");
 
+  const [confirmModal, setConfirmModal] = useState({
+    open: false,
+    title: "",
+    message: "",
+    confirmLabel: "Confirm",
+    isDanger: false,
+    onConfirm: null,
+  });
+
+  function openConfirmModal({ title, message, confirmLabel, isDanger, onConfirm }) {
+    setConfirmModal({ open: true, title, message, confirmLabel: confirmLabel || "Confirm", isDanger: !!isDanger, onConfirm });
+  }
+
+  function closeConfirmModal() {
+    setConfirmModal((prev) => ({ ...prev, open: false, onConfirm: null }));
+  }
+
   useEffect(() => {
     fetchReportedTrails();
   }, []);
@@ -124,97 +141,88 @@ function AdminModeration() {
     }
   }
 
-  async function handleDeletePost(trailId) {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this post? This action cannot be undone."
-    );
-    if (!confirmed) return;
-
+  async function execDeletePost(trailId) {
     try {
       setDeleteLoadingId(trailId);
       const token = localStorage.getItem("token");
-
       const res = await fetch(`http://localhost:5000/api/trails/admin/${trailId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to delete post");
-      }
-
+      if (!res.ok) throw new Error(data.error || "Failed to delete post");
       setReportedTrails((prev) => prev.filter((trail) => trail._id !== trailId));
     } catch (err) {
-      alert(err.message);
+      openConfirmModal({ title: "Error", message: err.message, confirmLabel: "OK", isDanger: false, onConfirm: closeConfirmModal });
     } finally {
       setDeleteLoadingId(null);
     }
   }
 
-  async function handleResolvePost(trailId) {
-    const confirmed = window.confirm(
-      "Mark this report as resolved and restore the post?"
-    );
-    if (!confirmed) return;
+  function handleDeletePost(trailId) {
+    openConfirmModal({
+      title: "Delete Post",
+      message: "Are you sure you want to delete this post? This action cannot be undone.",
+      confirmLabel: "Delete",
+      isDanger: true,
+      onConfirm: () => { closeConfirmModal(); execDeletePost(trailId); },
+    });
+  }
 
+  async function execResolvePost(trailId) {
     try {
       setResolveLoadingId(trailId);
       const token = localStorage.getItem("token");
-
-      const res = await fetch(
-        `http://localhost:5000/api/trails/admin/${trailId}/resolve`,
-        {
-          method: "PATCH",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
+      const res = await fetch(`http://localhost:5000/api/trails/admin/${trailId}/resolve`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to resolve report");
-      }
-
+      if (!res.ok) throw new Error(data.error || "Failed to resolve report");
       setReportedTrails((prev) => prev.filter((trail) => trail._id !== trailId));
     } catch (err) {
-      alert(err.message);
+      openConfirmModal({ title: "Error", message: err.message, confirmLabel: "OK", isDanger: false, onConfirm: closeConfirmModal });
     } finally {
       setResolveLoadingId(null);
     }
   }
 
-  async function handleDeleteUser(targetUser) {
-    const confirmed = window.confirm(
-      `Delete ${targetUser.username}'s account and all their posts? This cannot be undone.`
-    );
-    if (!confirmed) return;
+  function handleResolvePost(trailId) {
+    openConfirmModal({
+      title: "Resolve Report",
+      message: "Mark this report as resolved and restore the post?",
+      confirmLabel: "Resolve",
+      isDanger: false,
+      onConfirm: () => { closeConfirmModal(); execResolvePost(trailId); },
+    });
+  }
 
+  async function execDeleteUser(targetUser) {
     try {
       setDeleteUserLoadingId(targetUser._id);
       const token = localStorage.getItem("token");
-
-      const res = await fetch(
-        `http://localhost:5000/api/users/admin/users/${targetUser._id}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
+      const res = await fetch(`http://localhost:5000/api/users/admin/users/${targetUser._id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to delete user");
-      }
-
+      if (!res.ok) throw new Error(data.error || "Failed to delete user");
       setUsersList((prev) => prev.filter((u) => u._id !== targetUser._id));
     } catch (err) {
-      alert(err.message);
+      openConfirmModal({ title: "Error", message: err.message, confirmLabel: "OK", isDanger: false, onConfirm: closeConfirmModal });
     } finally {
       setDeleteUserLoadingId(null);
     }
+  }
+
+  function handleDeleteUser(targetUser) {
+    openConfirmModal({
+      title: "Delete Account",
+      message: `Delete ${targetUser.username}'s account and all their posts? This cannot be undone.`,
+      confirmLabel: "Delete Account",
+      isDanger: true,
+      onConfirm: () => { closeConfirmModal(); execDeleteUser(targetUser); },
+    });
   }
 
   function openSuspendModal(targetUser) {
@@ -283,44 +291,38 @@ function AdminModeration() {
     }
   }
 
-  async function handleUnsuspendUser(targetUser) {
-    const confirmed = window.confirm(
-      `Unsuspend ${targetUser.username}'s account?`
-    );
-    if (!confirmed) return;
-
+  async function execUnsuspendUser(targetUser) {
     try {
       setSuspendUserLoadingId(targetUser._id);
       const token = localStorage.getItem("token");
-
       const res = await fetch(
         `http://localhost:5000/api/users/admin/users/${targetUser._id}/suspension`,
         {
           method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            suspended: false,
-          }),
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ suspended: false }),
         }
       );
-
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to update suspension");
-      }
-
+      if (!res.ok) throw new Error(data.error || "Failed to update suspension");
       setUsersList((prev) =>
         prev.map((u) => (u._id === targetUser._id ? { ...u, ...data.user } : u))
       );
     } catch (err) {
-      alert(err.message);
+      openConfirmModal({ title: "Error", message: err.message, confirmLabel: "OK", isDanger: false, onConfirm: closeConfirmModal });
     } finally {
       setSuspendUserLoadingId(null);
     }
+  }
+
+  function handleUnsuspendUser(targetUser) {
+    openConfirmModal({
+      title: "Unsuspend User",
+      message: `Unsuspend ${targetUser.username}'s account?`,
+      confirmLabel: "Unsuspend",
+      isDanger: false,
+      onConfirm: () => { closeConfirmModal(); execUnsuspendUser(targetUser); },
+    });
   }
 
   if (!user || user.role !== "admin") return null;
@@ -637,6 +639,34 @@ function AdminModeration() {
             </>
           )}
         </>
+      )}
+
+      {confirmModal.open && (
+        <div className="admin-modal-overlay" onClick={closeConfirmModal}>
+          <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <h2>{confirmModal.title}</h2>
+              <button className="admin-modal-close" onClick={closeConfirmModal} type="button">×</button>
+            </div>
+            <p className="admin-modal-text">{confirmModal.message}</p>
+            <div className="admin-modal-actions">
+              <button
+                type="button"
+                className="admin-modal-cancel-button"
+                onClick={closeConfirmModal}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={confirmModal.isDanger ? "admin-modal-delete-button" : "admin-modal-confirm-button"}
+                onClick={confirmModal.onConfirm}
+              >
+                {confirmModal.confirmLabel}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {showSuspendModal && selectedUserForSuspension && (

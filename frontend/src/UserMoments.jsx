@@ -30,8 +30,10 @@ function UserMoments() {
 
   return (
     <div className="moments-page-container">
+      <div className="moments-back-row">
+        <button className="profile-back-button" onClick={() => navigate(-1)}>← Back</button>
+      </div>
       <div className="moments-page-header">
-        <button onClick={() => navigate(-1)}>← Back</button>
         <h1>{username}'s Moments</h1>
       </div>
 
