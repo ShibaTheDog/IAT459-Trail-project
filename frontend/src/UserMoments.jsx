@@ -15,18 +15,15 @@ function UserMoments() {
       .catch((err) => console.error("Error fetching trails:", err));
   }, []);
 
-  const isTrailFlagged = (trail) =>
-    trail.moderationStatus === "under_investigation" ||
-    trail.moderationStatus === "removed";
-
-  // ✅ ONLY CHANGE: filter by userId
   const userMoments = trails.filter(
     (trail) =>
-      !isTrailFlagged(trail) &&
+      trail.moderationStatus !== "removed" &&
       trail.user?._id === userId
   );
 
-  const username = userMoments[0]?.user?.username || "User";
+  // Get username from any post — including under_investigation ones
+  const username =
+    trails.find((t) => t.user?._id === userId)?.user?.username || "User";
 
   return (
     <div className="moments-page-container">
@@ -45,28 +42,38 @@ function UserMoments() {
         </div>
       ) : (
         <div className="trails-grid trails-grid-4col">
-          {userMoments.map((trail) => (
-            <div
-              key={trail._id || trail.id}
-              className="trail-card"
-              onClick={() => navigate(`/trail/${trail._id || trail.id}`)}
-            >
-              {trail.imgUrl && trail.imgUrl.trim() !== "" ? (
-                <img src={trail.imgUrl} alt={trail.title} />
-              ) : (
-                <div className="no-image-container">No Image</div>
-              )}
+          {userMoments.map((trail) => {
+            const isUnderInvestigation =
+              trail.moderationStatus === "under_investigation";
+            return (
+              <div
+                key={trail._id || trail.id}
+                className="trail-card"
+                onClick={() => navigate(`/trail/${trail._id || trail.id}`)}
+              >
+                <div className="trail-card-image-wrapper">
+                  {trail.imgUrl && trail.imgUrl.trim() !== "" ? (
+                    <img
+                      src={trail.imgUrl}
+                      alt={trail.title}
+                      className={isUnderInvestigation ? "trail-card-img-blurred" : ""}
+                    />
+                  ) : (
+                    <div className="no-image-container">No Image</div>
+                  )}
+                </div>
 
-              <div className="trail-info">
-                <h3>{trail.title}</h3>
-                {trail.user?.username && (
-                  <p className="trail-card-username">
-                    {trail.user.username}
-                  </p>
-                )}
+                <div className="trail-info">
+                  <h3>{trail.title}</h3>
+                  {trail.user?.username && (
+                    <p className="trail-card-username">
+                      {trail.user.username}
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

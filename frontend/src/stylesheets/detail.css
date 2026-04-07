@@ -417,6 +417,22 @@
   color: #038220;
 }
 
+.trail-card-image-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px 8px 0 0;
+}
+
+.trail-card-image-wrapper img {
+  display: block;
+  width: 100%;
+}
+
+.trail-card-img-blurred {
+  filter: blur(20px);
+  transform: scale(1.15);
+}
+
 .no-image-container {
   display: flex;
   justify-content: center;

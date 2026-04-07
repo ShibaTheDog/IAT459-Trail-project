@@ -129,11 +129,17 @@ function TrailResult() {
                 className="trail-card"
                 onClick={() => navigate(`/trail/${post._id}`)}
               >
-                {post.imgUrl ? (
-                  <img src={post.imgUrl} alt={post.title} />
-                ) : (
-                  <div className="no-image-container">No Image</div>
-                )}
+                <div className="trail-card-image-wrapper">
+                  {post.imgUrl ? (
+                    <img
+                      src={post.imgUrl}
+                      alt={post.title}
+                      className={post.moderationStatus === "under_investigation" ? "trail-card-img-blurred" : ""}
+                    />
+                  ) : (
+                    <div className="no-image-container">No Image</div>
+                  )}
+                </div>
 
                 <div className="trail-info">
                   <h3>{post.title}</h3>
@@ -147,11 +153,6 @@ function TrailResult() {
                     >
                       {post.user.username}
                     </p>
-                  )}
-                  {post.moderationStatus === "under_investigation" && (
-                    <span className="trail-card-investigation-badge">
-                      Under Investigation
-                    </span>
                   )}
                 </div>
               </div>
