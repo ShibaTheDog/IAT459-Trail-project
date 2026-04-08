@@ -152,21 +152,30 @@ export function AuthProvider({ children }) {
     };
   }, [token, validateSession]);
 
-  async function refreshUser() {
-    if (!token) return;
+  const refreshUser = useCallback(async () => {
+    if (!token) return null;
+    
     try {
       const res = await fetch("http://localhost:5000/api/users/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error("Failed to refresh user data");
-      const freshUserData = await res.json();
       
-      // Merge with existing JWT data (to keep id, role, etc.)
-      setUser((prev) => ({ ...prev, ...freshUserData }));
+      if (!res.ok) {
+        throw new Error("Failed to refresh user data");
+      }
+      
+      const data = await res.json();
+      const freshUserData = data.user;
+      
+      localStorage.setItem("user", JSON.stringify(freshUserData));
+      setUser(freshUserData);
+      
+      return freshUserData;
     } catch (err) {
       console.error("Failed to refresh user:", err);
+      return null;
     }
-  }
+  }, [token]);
 
   const value = useMemo(
     () => ({
@@ -176,6 +185,7 @@ export function AuthProvider({ children }) {
       login,
       logout,
       validateSession,
+      refreshUser,
     }),
     [token, user, authChecked, login, logout, validateSession, refreshUser]
   );

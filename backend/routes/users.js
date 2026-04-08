@@ -23,6 +23,7 @@ router.get("/me", auth, async (req, res) => {
         role: currentUser.role,
         suspended: currentUser.suspended,
         suspendedUntil: currentUser.suspendedUntil,
+        favorites: currentUser.favorites,  
       },
     });
   } catch (err) {

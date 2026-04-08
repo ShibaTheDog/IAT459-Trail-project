@@ -43,12 +43,11 @@ function TrailDetail() {
       });
   }, [id]);
 
-  // ADD THIS NEW USEEFFECT:
   useEffect(() => {
     if (user && refreshUser) {
       refreshUser();
     }
-  }, [id]); // Refresh user data when viewing a trail
+  }, [id, user, refreshUser]); 
 
   useEffect(() => {
     if (!trail || !user) return;
@@ -157,15 +156,7 @@ function TrailDetail() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Failed to favorite");
 
-      // **Refresh user after backend updates**
-      const updatedUser = await refreshUser();
-      if (updatedUser) {
-        const favorited = (updatedUser.favorites || []).some((fav) => {
-          const favId = typeof fav === "string" ? fav : fav._id;
-          return String(favId) === String(trail._id);
-        });
-        setIsFavorited(favorited);
-      }
+      await refreshUser();
     } catch (err) {
       console.error(err);
       alert(err.message);
