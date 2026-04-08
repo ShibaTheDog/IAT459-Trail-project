@@ -70,6 +70,7 @@ router.get("/admin/users", auth, authorizeRole("admin"), async (req, res) => {
 });
 
 // ADMIN: SUSPEND / UNSUSPEND USER
+/*
 router.patch(
   "/admin/users/:id/suspension",
   auth,
@@ -139,6 +140,7 @@ router.patch(
     }
   }
 );
+*/
 
 // ADMIN: DELETE USER
 router.delete("/admin/users/:id", auth, authorizeRole("admin"), async (req, res) => {

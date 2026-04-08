@@ -27,13 +27,6 @@ function AdminModeration() {
     limit: 20,
   });
   const [deleteUserLoadingId, setDeleteUserLoadingId] = useState(null);
-  const [suspendUserLoadingId, setSuspendUserLoadingId] = useState(null);
-
-  const [showSuspendModal, setShowSuspendModal] = useState(false);
-  const [selectedUserForSuspension, setSelectedUserForSuspension] =
-    useState(null);
-  const [suspensionDays, setSuspensionDays] = useState("7");
-  const [suspensionModalError, setSuspensionModalError] = useState("");
 
   const [confirmModal, setConfirmModal] = useState({
     open: false,
@@ -44,8 +37,21 @@ function AdminModeration() {
     onConfirm: null,
   });
 
-  function openConfirmModal({ title, message, confirmLabel, isDanger, onConfirm }) {
-    setConfirmModal({ open: true, title, message, confirmLabel: confirmLabel || "Confirm", isDanger: !!isDanger, onConfirm });
+  function openConfirmModal({
+    title,
+    message,
+    confirmLabel,
+    isDanger,
+    onConfirm,
+  }) {
+    setConfirmModal({
+      open: true,
+      title,
+      message,
+      confirmLabel: confirmLabel || "Confirm",
+      isDanger: !!isDanger,
+      onConfirm,
+    });
   }
 
   function closeConfirmModal() {
@@ -145,15 +151,24 @@ function AdminModeration() {
     try {
       setDeleteLoadingId(trailId);
       const token = localStorage.getItem("token");
+
       const res = await fetch(`http://localhost:5000/api/trails/admin/${trailId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to delete post");
+
       setReportedTrails((prev) => prev.filter((trail) => trail._id !== trailId));
     } catch (err) {
-      openConfirmModal({ title: "Error", message: err.message, confirmLabel: "OK", isDanger: false, onConfirm: closeConfirmModal });
+      openConfirmModal({
+        title: "Error",
+        message: err.message,
+        confirmLabel: "OK",
+        isDanger: false,
+        onConfirm: closeConfirmModal,
+      });
     } finally {
       setDeleteLoadingId(null);
     }
@@ -165,7 +180,10 @@ function AdminModeration() {
       message: "Are you sure you want to delete this post? This action cannot be undone.",
       confirmLabel: "Delete",
       isDanger: true,
-      onConfirm: () => { closeConfirmModal(); execDeletePost(trailId); },
+      onConfirm: () => {
+        closeConfirmModal();
+        execDeletePost(trailId);
+      },
     });
   }
 
@@ -173,15 +191,27 @@ function AdminModeration() {
     try {
       setResolveLoadingId(trailId);
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5000/api/trails/admin/${trailId}/resolve`, {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+
+      const res = await fetch(
+        `http://localhost:5000/api/trails/admin/${trailId}/resolve`,
+        {
+          method: "PATCH",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to resolve report");
+
       setReportedTrails((prev) => prev.filter((trail) => trail._id !== trailId));
     } catch (err) {
-      openConfirmModal({ title: "Error", message: err.message, confirmLabel: "OK", isDanger: false, onConfirm: closeConfirmModal });
+      openConfirmModal({
+        title: "Error",
+        message: err.message,
+        confirmLabel: "OK",
+        isDanger: false,
+        onConfirm: closeConfirmModal,
+      });
     } finally {
       setResolveLoadingId(null);
     }
@@ -193,7 +223,10 @@ function AdminModeration() {
       message: "Mark this report as resolved and restore the post?",
       confirmLabel: "Resolve",
       isDanger: false,
-      onConfirm: () => { closeConfirmModal(); execResolvePost(trailId); },
+      onConfirm: () => {
+        closeConfirmModal();
+        execResolvePost(trailId);
+      },
     });
   }
 
@@ -201,15 +234,27 @@ function AdminModeration() {
     try {
       setDeleteUserLoadingId(targetUser._id);
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5000/api/users/admin/users/${targetUser._id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+
+      const res = await fetch(
+        `http://localhost:5000/api/users/admin/users/${targetUser._id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to delete user");
+
       setUsersList((prev) => prev.filter((u) => u._id !== targetUser._id));
     } catch (err) {
-      openConfirmModal({ title: "Error", message: err.message, confirmLabel: "OK", isDanger: false, onConfirm: closeConfirmModal });
+      openConfirmModal({
+        title: "Error",
+        message: err.message,
+        confirmLabel: "OK",
+        isDanger: false,
+        onConfirm: closeConfirmModal,
+      });
     } finally {
       setDeleteUserLoadingId(null);
     }
@@ -221,107 +266,10 @@ function AdminModeration() {
       message: `Delete ${targetUser.username}'s account and all their posts? This cannot be undone.`,
       confirmLabel: "Delete Account",
       isDanger: true,
-      onConfirm: () => { closeConfirmModal(); execDeleteUser(targetUser); },
-    });
-  }
-
-  function openSuspendModal(targetUser) {
-    setSelectedUserForSuspension(targetUser);
-    setSuspensionDays("7");
-    setSuspensionModalError("");
-    setShowSuspendModal(true);
-  }
-
-  function closeSuspendModal() {
-    if (suspendUserLoadingId) return;
-    setShowSuspendModal(false);
-    setSelectedUserForSuspension(null);
-    setSuspensionDays("7");
-    setSuspensionModalError("");
-  }
-
-  async function handleConfirmSuspension() {
-    if (!selectedUserForSuspension) return;
-
-    const parsedDays = Number(suspensionDays);
-
-    if (!Number.isFinite(parsedDays) || parsedDays <= 0) {
-      setSuspensionModalError("Please enter a valid number of days.");
-      return;
-    }
-
-    try {
-      setSuspendUserLoadingId(selectedUserForSuspension._id);
-      setSuspensionModalError("");
-
-      const token = localStorage.getItem("token");
-
-      const res = await fetch(
-        `http://localhost:5000/api/users/admin/users/${selectedUserForSuspension._id}/suspension`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            suspended: true,
-            durationDays: parsedDays,
-          }),
-        }
-      );
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to suspend user");
-      }
-
-      setUsersList((prev) =>
-        prev.map((u) =>
-          u._id === selectedUserForSuspension._id ? { ...u, ...data.user } : u
-        )
-      );
-
-      closeSuspendModal();
-    } catch (err) {
-      setSuspensionModalError(err.message);
-    } finally {
-      setSuspendUserLoadingId(null);
-    }
-  }
-
-  async function execUnsuspendUser(targetUser) {
-    try {
-      setSuspendUserLoadingId(targetUser._id);
-      const token = localStorage.getItem("token");
-      const res = await fetch(
-        `http://localhost:5000/api/users/admin/users/${targetUser._id}/suspension`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ suspended: false }),
-        }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to update suspension");
-      setUsersList((prev) =>
-        prev.map((u) => (u._id === targetUser._id ? { ...u, ...data.user } : u))
-      );
-    } catch (err) {
-      openConfirmModal({ title: "Error", message: err.message, confirmLabel: "OK", isDanger: false, onConfirm: closeConfirmModal });
-    } finally {
-      setSuspendUserLoadingId(null);
-    }
-  }
-
-  function handleUnsuspendUser(targetUser) {
-    openConfirmModal({
-      title: "Unsuspend User",
-      message: `Unsuspend ${targetUser.username}'s account?`,
-      confirmLabel: "Unsuspend",
-      isDanger: false,
-      onConfirm: () => { closeConfirmModal(); execUnsuspendUser(targetUser); },
+      onConfirm: () => {
+        closeConfirmModal();
+        execDeleteUser(targetUser);
+      },
     });
   }
 
@@ -460,9 +408,7 @@ function AdminModeration() {
                         onClick={() => handleResolvePost(trail._id)}
                         disabled={resolveLoadingId === trail._id}
                       >
-                        {resolveLoadingId === trail._id
-                          ? "Resolving…"
-                          : "Resolve"}
+                        {resolveLoadingId === trail._id ? "Resolving…" : "Resolve"}
                       </button>
 
                       <button
@@ -545,17 +491,6 @@ function AdminModeration() {
                         >
                           {targetUser.role === "admin" ? "Admin" : "User"}
                         </span>
-
-                        {targetUser.suspended && (
-                          <span className="admin-suspended-badge">
-                            Suspended
-                            {targetUser.suspendedUntil
-                              ? ` until ${new Date(
-                                  targetUser.suspendedUntil
-                                ).toLocaleDateString()}`
-                              : ""}
-                          </span>
-                        )}
                       </div>
 
                       <div className="admin-card-actions">
@@ -566,26 +501,6 @@ function AdminModeration() {
                           }
                         >
                           View Posts
-                        </button>
-
-                        <button
-                          className="admin-suspend-user-button"
-                          onClick={() =>
-                            targetUser.suspended
-                              ? handleUnsuspendUser(targetUser)
-                              : openSuspendModal(targetUser)
-                          }
-                          disabled={
-                            suspendUserLoadingId === targetUser._id ||
-                            isCurrentAdmin ||
-                            isAdminAccount
-                          }
-                        >
-                          {suspendUserLoadingId === targetUser._id
-                            ? "Saving…"
-                            : targetUser.suspended
-                              ? "Unsuspend"
-                              : "Suspend"}
                         </button>
 
                         <button
@@ -646,9 +561,17 @@ function AdminModeration() {
           <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
             <div className="admin-modal-header">
               <h2>{confirmModal.title}</h2>
-              <button className="admin-modal-close" onClick={closeConfirmModal} type="button">×</button>
+              <button
+                className="admin-modal-close"
+                onClick={closeConfirmModal}
+                type="button"
+              >
+                ×
+              </button>
             </div>
+
             <p className="admin-modal-text">{confirmModal.message}</p>
+
             <div className="admin-modal-actions">
               <button
                 type="button"
@@ -657,71 +580,17 @@ function AdminModeration() {
               >
                 Cancel
               </button>
+
               <button
                 type="button"
-                className={confirmModal.isDanger ? "admin-modal-delete-button" : "admin-modal-confirm-button"}
+                className={
+                  confirmModal.isDanger
+                    ? "admin-modal-delete-button"
+                    : "admin-modal-confirm-button"
+                }
                 onClick={confirmModal.onConfirm}
               >
                 {confirmModal.confirmLabel}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showSuspendModal && selectedUserForSuspension && (
-        <div className="admin-modal-overlay" onClick={closeSuspendModal}>
-          <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="admin-modal-header">
-              <h2>Suspend User</h2>
-              <button
-                className="admin-modal-close"
-                onClick={closeSuspendModal}
-                type="button"
-                disabled={!!suspendUserLoadingId}
-              >
-                ×
-              </button>
-            </div>
-
-            <p className="admin-modal-text">
-              Choose how long <strong>{selectedUserForSuspension.username}</strong>{" "}
-              should be suspended for.
-            </p>
-
-            <div className="admin-modal-field">
-              <label htmlFor="suspensionDays">Suspension Length (days)</label>
-              <input
-                id="suspensionDays"
-                type="number"
-                min="1"
-                value={suspensionDays}
-                onChange={(e) => setSuspensionDays(e.target.value)}
-                className="admin-modal-input"
-              />
-            </div>
-
-            {suspensionModalError && (
-              <p className="admin-modal-error">{suspensionModalError}</p>
-            )}
-
-            <div className="admin-modal-actions">
-              <button
-                type="button"
-                className="admin-modal-cancel-button"
-                onClick={closeSuspendModal}
-                disabled={!!suspendUserLoadingId}
-              >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                className="admin-modal-confirm-button"
-                onClick={handleConfirmSuspension}
-                disabled={!!suspendUserLoadingId}
-              >
-                {suspendUserLoadingId ? "Saving…" : "Confirm Suspension"}
               </button>
             </div>
           </div>
