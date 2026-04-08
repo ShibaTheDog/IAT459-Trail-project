@@ -7,13 +7,18 @@ import "./stylesheets/profile.css";
 function Profile() {
   const [trails, setTrails] = useState([]);
   const navigate = useNavigate();
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, refreshUser } = useContext(AuthContext);
 
   useEffect(() => {
     if (!user) {
       navigate("/dashboard");
       return;
     }
+    
+    if (refreshUser) {
+      refreshUser();
+    }
+    
     fetch("http://localhost:5000/api/trails")
       .then((res) => res.json())
       .then((data) => setTrails(data))
@@ -184,6 +189,44 @@ function Profile() {
           </>
         )}
       </div>
+
+      {/* Favorited Trail Moments */}
+      <div className="moments-section favorited-moments">
+        <h2>Favorited Trail Moments</h2>
+
+        {user.favorites && user.favorites.length > 0 ? (
+          <div className="trails-grid">
+            {trails
+              .filter((trail) =>
+                user.favorites.some(
+                  (favId) => String(favId) === String(trail._id)
+                )
+              )
+              .map((trail) => (
+                <div
+                  key={trail._id || trail.id}
+                  className="trail-card"
+                  onClick={() => navigate(`/trail/${trail._id || trail.id}`)}
+                >
+                  {trail.imgUrl && trail.imgUrl.trim() !== "" ? (
+                    <img src={trail.imgUrl} alt={trail.title} />
+                  ) : (
+                    <div className="no-image-container">No Image</div>
+                  )}
+                  <div className="trail-info">
+                    <h3>{trail.title}</h3>
+                  </div>
+                </div>
+              ))}
+          </div>
+        ) : (
+          <div className="empty-state">
+            <p>
+              <strong>No favorited moments yet. Start exploring trails!</strong>
+            </p>
+          </div>
+        )}
+      </div>      
 
       <div className="bottom-buffer"></div>
     </div>

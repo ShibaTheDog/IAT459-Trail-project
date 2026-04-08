@@ -19,7 +19,10 @@ function TrailDetail() {
   const [reportSuccess, setReportSuccess] = useState("");
 
   const navigate = useNavigate();
-  const { token, user } = useContext(AuthContext);
+  // const { token, user } = useContext(AuthContext);
+  const { token, user, refreshUser } = useContext(AuthContext);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
 
   useEffect(() => {
     fetch(`http://localhost:5000/api/trails/${id}`)
@@ -35,6 +38,22 @@ function TrailDetail() {
         setPageError("Could not load the trail details. Please try again.");
       });
   }, [id]);
+
+  // ADD THIS NEW USEEFFECT:
+  useEffect(() => {
+    if (user && refreshUser) {
+      refreshUser();
+    }
+  }, [id]); // Refresh user data when viewing a trail
+
+  useEffect(() => {
+    if (!trail || !user) return;
+    const favorited = (user.favorites || []).some((fav) => {
+      const favId = typeof fav === "string" ? fav : fav._id;
+      return String(favId) === String(trail._id);
+    });
+    setIsFavorited(favorited);
+  }, [trail, user]);
 
   async function handleAdminDelete() {
     const confirmDelete = window.confirm(
@@ -96,6 +115,41 @@ function TrailDetail() {
       alert(err.message);
     } finally {
       setDeleteLoading(false);
+    }
+  }
+
+  async function handleFavoriteToggle() {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    setFavoriteLoading(true);
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/trails/${id}/favorite`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to favorite");
+
+      // **Refresh user after backend updates**
+      const updatedUser = await refreshUser();
+      if (updatedUser) {
+        const favorited = (updatedUser.favorites || []).some((fav) => {
+          const favId = typeof fav === "string" ? fav : fav._id;
+          return String(favId) === String(trail._id);
+        });
+        setIsFavorited(favorited);
+      }
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    } finally {
+      setFavoriteLoading(false);
     }
   }
 
@@ -306,6 +360,20 @@ function TrailDetail() {
                       onClick={() => navigate(`/trail-result/${match.id}`)}
                     >
                       View Trail
+                    </button>
+                  )}
+
+                  {user && (
+                    <button
+                      className="favorite-button"
+                      onClick={handleFavoriteToggle}
+                      disabled={favoriteLoading}
+                    >
+                      {favoriteLoading
+                        ? "Loading..."
+                        : isFavorited
+                        ? "★ Unfavorite"
+                        : "☆ Favorite"}
                     </button>
                   )}
                 </div>

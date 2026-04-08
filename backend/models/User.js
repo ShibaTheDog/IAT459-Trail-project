@@ -35,6 +35,15 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    favorites: {
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Trail",
+        },
+      ],
+      default: [],
+    },
   },
   { timestamps: true }
 );

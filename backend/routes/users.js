@@ -6,6 +6,20 @@ const Trail = require("../models/Trail");
 const auth = require("../middleware/auth");
 const authorizeRole = require("../middleware/authorizeRole");
 
+// GET CURRENT USER DATA (for refreshing favorites, etc.)
+router.get("/me", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.json(user);
+  } catch (err) {
+    console.error("GET /api/users/me error:", err.message);
+    res.status(500).json({ error: "Failed to fetch user data" });
+  }
+});
+
 // USER: DELETE OWN ACCOUNT
 router.delete("/me", auth, async (req, res) => {
   try {

@@ -38,10 +38,27 @@ export function AuthProvider({ children }) {
     setUser(null);
   }
 
+  // 4. Function to refresh user data from backend
+  async function refreshUser() {
+    if (!token) return;
+    try {
+      const res = await fetch("http://localhost:5000/api/users/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to refresh user data");
+      const freshUserData = await res.json();
+      
+      // Merge with existing JWT data (to keep id, role, etc.)
+      setUser((prev) => ({ ...prev, ...freshUserData }));
+    } catch (err) {
+      console.error("Failed to refresh user:", err);
+    }
+  }
+
   return (
     // We provide 'token' and 'user' (data)
-    // and 'login' and 'logout' (functions) to the whole app
-    <AuthContext.Provider value={{ token, user, login, logout }}>
+    // and 'login', 'logout', and 'refreshUser' (functions) to the whole app
+    <AuthContext.Provider value={{ token, user, login, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
