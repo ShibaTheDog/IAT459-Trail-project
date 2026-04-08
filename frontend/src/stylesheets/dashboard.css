@@ -151,7 +151,7 @@
 }
 
 .login-button {
-  background-color: #5a75f0;
+  background-color: #038220;
   color: white;
   border: none;
   padding: 10px 35px;
@@ -160,6 +160,10 @@
   font-weight: 500;
   cursor: pointer;
   margin-top: 10px;
+}
+
+.login-button:hover {
+  background-color: #026a1a;
 }
 
 .create-post-button {

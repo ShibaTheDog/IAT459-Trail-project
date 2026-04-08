@@ -6,6 +6,10 @@ import "./stylesheets/profile.css";
 
 function Profile() {
   const [trails, setTrails] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
   const navigate = useNavigate();
   const { user, logout } = useContext(AuthContext);
 
@@ -14,6 +18,7 @@ function Profile() {
       navigate("/dashboard");
       return;
     }
+
     fetch("http://localhost:5000/api/trails")
       .then((res) => res.json())
       .then((data) => setTrails(data))
@@ -30,7 +35,7 @@ function Profile() {
 
   const uniqueTrails = [
     ...new Set(
-      myTrails.map((post) => post.tag?.toLowerCase().trim()).filter(Boolean),
+      myTrails.map((post) => post.tag?.toLowerCase().trim()).filter(Boolean)
     ),
   ];
 
@@ -38,11 +43,13 @@ function Profile() {
 
   const totalHoursHiked = uniqueTrails.reduce((total, tag) => {
     const matchingTrail = dataSet.find(
-      (t) => t.trailTitle?.toLowerCase().trim() === tag,
+      (t) => t.trailTitle?.toLowerCase().trim() === tag
     );
+
     if (matchingTrail && matchingTrail.time) {
       return total + parseFloat(matchingTrail.time);
     }
+
     return total;
   }, 0);
 
@@ -51,22 +58,40 @@ function Profile() {
     navigate("/dashboard");
   }
 
-  async function handleDeleteAccount() {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete your account? This cannot be undone.",
-    );
-    if (!confirmed) return;
+  function openDeleteModal() {
+    setDeleteError("");
+    setShowDeleteModal(true);
+  }
 
+  function closeDeleteModal() {
+    if (deleteLoading) return;
+    setShowDeleteModal(false);
+    setDeleteError("");
+  }
+
+  async function confirmDeleteAccount() {
     try {
+      setDeleteLoading(true);
+      setDeleteError("");
+
       const token = localStorage.getItem("token");
+
       const res = await fetch("http://localhost:5000/api/users/me", {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
+      const contentType = res.headers.get("content-type");
+      let data = null;
+
+      if (contentType && contentType.includes("application/json")) {
+        data = await res.json();
+      }
+
       if (!res.ok) {
-        const data = await res.json();
-        alert(data.error || "Failed to delete account. Please try again.");
+        setDeleteError(data?.error || "Failed to delete account. Please try again.");
         return;
       }
 
@@ -74,7 +99,9 @@ function Profile() {
       navigate("/dashboard");
     } catch (err) {
       console.error("Delete account error:", err);
-      alert("A network error occurred. Please try again.");
+      setDeleteError("A network error occurred. Please try again.");
+    } finally {
+      setDeleteLoading(false);
     }
   }
 
@@ -82,7 +109,6 @@ function Profile() {
 
   return (
     <div className="profile-container">
-      {/* Top nav */}
       <div className="profile-nav">
         <button
           className="profile-back-button"
@@ -90,6 +116,7 @@ function Profile() {
         >
           &#8592; Back
         </button>
+
         <div className="profile-nav-actions">
           {user.role === "admin" && (
             <button
@@ -99,34 +126,39 @@ function Profile() {
               Admin Moderation
             </button>
           )}
-          <button className="btn-delete-account" onClick={handleDeleteAccount}>
+
+          <button className="btn-delete-account" onClick={openDeleteModal}>
             Delete Account
           </button>
+
           <button className="btn-logout" onClick={handleLogout}>
             Logout
           </button>
         </div>
       </div>
 
-      {/* Profile section */}
       <div className="profile-section">
         <div className="profile-avatar-large">
           {user.username.charAt(0).toUpperCase()}
         </div>
+
         <div className="profile-info">
           <h2 className="profile-username">
             {user.username}
             <span className="profile-role-badge">({user.role})</span>
           </h2>
+
           <div className="profile-stats">
             <div className="profile-stat-item">
               <span className="profile-stat-number">{trailsVisitedCount}</span>
               <span className="profile-stat-label">Trails Visited</span>
             </div>
+
             <div className="profile-stat-item">
               <span className="profile-stat-number">{myTrails.length}</span>
               <span className="profile-stat-label">Trail Moments</span>
             </div>
+
             <div className="profile-stat-item">
               <span className="profile-stat-number">{totalHoursHiked}</span>
               <span className="profile-stat-label">Hours Hiked</span>
@@ -135,7 +167,6 @@ function Profile() {
         </div>
       </div>
 
-      {/* My Trail Moment */}
       <div className="moments-section my-moments">
         {myTrails.length === 0 ? (
           <>
@@ -163,6 +194,7 @@ function Profile() {
                 Create post
               </button>
             </div>
+
             <div className="trails-grid">
               {myTrails.map((trail) => (
                 <div
@@ -175,6 +207,7 @@ function Profile() {
                   ) : (
                     <div className="no-image-container">No Image</div>
                   )}
+
                   <div className="trail-info">
                     <h3>{trail.title}</h3>
                   </div>
@@ -186,6 +219,55 @@ function Profile() {
       </div>
 
       <div className="bottom-buffer"></div>
+
+      {showDeleteModal && (
+        <div className="profile-modal-overlay" onClick={closeDeleteModal}>
+          <div
+            className="profile-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="profile-modal-header">
+              <h2>Delete Account</h2>
+              <button
+                className="profile-modal-close"
+                onClick={closeDeleteModal}
+                type="button"
+                disabled={deleteLoading}
+              >
+                ×
+              </button>
+            </div>
+
+            <p className="profile-modal-text">
+              Are you sure you want to delete your account? This cannot be undone.
+            </p>
+
+            {deleteError && (
+              <p className="profile-modal-error">{deleteError}</p>
+            )}
+
+            <div className="profile-modal-actions">
+              <button
+                type="button"
+                className="profile-modal-cancel-button"
+                onClick={closeDeleteModal}
+                disabled={deleteLoading}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className="profile-modal-delete-button"
+                onClick={confirmDeleteAccount}
+                disabled={deleteLoading}
+              >
+                {deleteLoading ? "Deleting..." : "Delete Account"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -10,6 +10,10 @@ function TrailDetail() {
   const [pageError, setPageError] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteMode, setDeleteMode] = useState("owner");
+  const [deleteError, setDeleteError] = useState("");
+
   const [showReportModal, setShowReportModal] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [reportReason, setReportReason] = useState("offensive");
@@ -36,64 +40,51 @@ function TrailDetail() {
       });
   }, [id]);
 
-  async function handleAdminDelete() {
-    const confirmDelete = window.confirm(
-      "Admin: Are you sure you want to delete this post?"
-    );
-    if (!confirmDelete) return;
-
-    try {
-      setDeleteLoading(true);
-      const response = await fetch(
-        `http://localhost:5000/api/trails/admin/${id}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to delete trail");
-      }
-
-      navigate("/dashboard");
-    } catch (err) {
-      console.error("Admin delete error:", err);
-      alert(err.message);
-    } finally {
-      setDeleteLoading(false);
-    }
+  function openDeleteModal(mode) {
+    setDeleteMode(mode);
+    setDeleteError("");
+    setShowDeleteModal(true);
   }
 
-  async function handleDelete() {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this trail post?"
-    );
+  function closeDeleteModal() {
+    if (deleteLoading) return;
+    setShowDeleteModal(false);
+    setDeleteError("");
+  }
 
-    if (!confirmDelete) return;
-
+  async function confirmDelete() {
     try {
       setDeleteLoading(true);
+      setDeleteError("");
 
-      const response = await fetch(`http://localhost:5000/api/trails/${id}`, {
+      const endpoint =
+        deleteMode === "admin"
+          ? `http://localhost:5000/api/trails/admin/${id}`
+          : `http://localhost:5000/api/trails/${id}`;
+
+      const response = await fetch(endpoint, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get("content-type");
+      let data = null;
 
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to delete trail");
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
       }
 
-      alert("Trail deleted successfully.");
+      if (!response.ok) {
+        throw new Error(data?.error || "Failed to delete trail");
+      }
+
+      closeDeleteModal();
       navigate("/dashboard");
     } catch (err) {
       console.error("Delete error:", err);
-      alert(err.message);
+      setDeleteError(err.message || "Failed to delete trail");
     } finally {
       setDeleteLoading(false);
     }
@@ -253,7 +244,7 @@ function TrailDetail() {
               {user?.role === "admin" ? (
                 <button
                   className="trail-action-button trail-action-delete"
-                  onClick={handleAdminDelete}
+                  onClick={() => openDeleteModal("admin")}
                   disabled={deleteLoading}
                 >
                   {deleteLoading ? "Deleting..." : "Delete"}
@@ -320,7 +311,7 @@ function TrailDetail() {
           {isOwner && (
             <div className="trail-delete-container">
               <button
-                onClick={handleDelete}
+                onClick={() => openDeleteModal("owner")}
                 className="trail-delete-button"
                 disabled={deleteLoading}
               >
@@ -330,6 +321,52 @@ function TrailDetail() {
           )}
         </div>
       </div>
+
+      {showDeleteModal && (
+        <div className="delete-modal-overlay" onClick={closeDeleteModal}>
+          <div className="delete-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="delete-modal-header">
+              <h2>{deleteMode === "admin" ? "Delete Post" : "Delete Trail"}</h2>
+              <button
+                className="delete-modal-close"
+                onClick={closeDeleteModal}
+                type="button"
+                disabled={deleteLoading}
+              >
+                ×
+              </button>
+            </div>
+
+            <p className="delete-modal-text">
+              {deleteMode === "admin"
+                ? "Are you sure you want to delete this trail post? This cannot be undone."
+                : "Are you sure you want to delete this trail post? This cannot be undone."}
+            </p>
+
+            {deleteError && <p className="delete-modal-error">{deleteError}</p>}
+
+            <div className="delete-modal-actions">
+              <button
+                type="button"
+                className="delete-modal-cancel-button"
+                onClick={closeDeleteModal}
+                disabled={deleteLoading}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className="delete-modal-confirm-button"
+                onClick={confirmDelete}
+                disabled={deleteLoading}
+              >
+                {deleteLoading ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showReportModal && (
         <div className="report-modal-overlay" onClick={closeReportModal}>

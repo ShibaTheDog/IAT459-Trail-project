@@ -23,18 +23,6 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user",
     },
-    suspended: {
-      type: Boolean,
-      default: false,
-    },
-    suspendedAt: {
-      type: Date,
-      default: null,
-    },
-    suspendedUntil: {
-      type: Date,
-      default: null,
-    },
   },
   { timestamps: true }
 );
