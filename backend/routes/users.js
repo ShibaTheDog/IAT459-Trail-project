@@ -6,17 +6,28 @@ const Trail = require("../models/Trail");
 const auth = require("../middleware/auth");
 const authorizeRole = require("../middleware/authorizeRole");
 
-// GET CURRENT USER DATA (for refreshing favorites, etc.)
+// USER: GET CURRENT SESSION USER
 router.get("/me", auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
-    if (!user) {
+    const currentUser = await User.findById(req.user.id).select("-password");
+
+    if (!currentUser) {
       return res.status(404).json({ error: "User not found" });
     }
-    res.json(user);
+
+    res.json({
+      user: {
+        _id: currentUser._id,
+        username: currentUser.username,
+        email: currentUser.email,
+        role: currentUser.role,
+        suspended: currentUser.suspended,
+        suspendedUntil: currentUser.suspendedUntil,
+      },
+    });
   } catch (err) {
     console.error("GET /api/users/me error:", err.message);
-    res.status(500).json({ error: "Failed to fetch user data" });
+    res.status(500).json({ error: "Failed to fetch current user" });
   }
 });
 
@@ -82,79 +93,6 @@ router.get("/admin/users", auth, authorizeRole("admin"), async (req, res) => {
     res.status(500).json({ error: "Failed to fetch users" });
   }
 });
-
-// ADMIN: SUSPEND / UNSUSPEND USER
-/*
-router.patch(
-  "/admin/users/:id/suspension",
-  auth,
-  authorizeRole("admin"),
-  async (req, res) => {
-    try {
-      const { suspended, durationDays } = req.body;
-
-      if (typeof suspended !== "boolean") {
-        return res.status(400).json({ error: "Suspended must be true or false" });
-      }
-
-      const targetUser = await User.findById(req.params.id);
-      if (!targetUser) {
-        return res.status(404).json({ error: "User not found" });
-      }
-
-      if (String(targetUser._id) === String(req.user.id)) {
-        return res.status(400).json({ error: "You cannot suspend your own account" });
-      }
-
-      if (targetUser.role === "admin") {
-        return res.status(403).json({ error: "You cannot suspend another admin" });
-      }
-
-      if (suspended) {
-        const parsedDays = Number(durationDays);
-
-        if (!Number.isFinite(parsedDays) || parsedDays <= 0) {
-          return res.status(400).json({ error: "A valid suspension duration is required" });
-        }
-
-        const suspendedUntil = new Date();
-        suspendedUntil.setDate(suspendedUntil.getDate() + parsedDays);
-
-        targetUser.suspended = true;
-        targetUser.suspendedAt = new Date();
-        targetUser.suspendedUntil = suspendedUntil;
-      } else {
-        targetUser.suspended = false;
-        targetUser.suspendedAt = null;
-        targetUser.suspendedUntil = null;
-      }
-
-      await targetUser.save();
-
-      res.json({
-        message: suspended
-          ? "User suspended successfully"
-          : "User unsuspended successfully",
-        user: {
-          _id: targetUser._id,
-          username: targetUser.username,
-          email: targetUser.email,
-          role: targetUser.role,
-          suspended: targetUser.suspended,
-          suspendedAt: targetUser.suspendedAt,
-          suspendedUntil: targetUser.suspendedUntil,
-        },
-      });
-    } catch (err) {
-      console.error(
-        "PATCH /api/users/admin/users/:id/suspension error:",
-        err.message
-      );
-      res.status(500).json({ error: "Failed to update suspension status" });
-    }
-  }
-);
-*/
 
 // ADMIN: DELETE USER
 router.delete("/admin/users/:id", auth, authorizeRole("admin"), async (req, res) => {

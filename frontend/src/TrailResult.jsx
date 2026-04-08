@@ -36,7 +36,7 @@ function TrailResult() {
     (post) =>
       post.tag &&
       trail.trailTitle &&
-      post.tag.toLowerCase().trim() === trail.trailTitle.toLowerCase().trim(),
+      post.tag.toLowerCase().trim() === trail.trailTitle.toLowerCase().trim()
   );
 
   return (
@@ -123,40 +123,58 @@ function TrailResult() {
           </div>
         ) : (
           <div className="trails-grid">
-            {matchingPosts.map((post) => (
-              <div
-                key={post._id}
-                className="trail-card"
-                onClick={() => navigate(`/trail/${post._id}`)}
-              >
-                <div className="trail-card-image-wrapper">
-                  {post.imgUrl ? (
-                    <img
-                      src={post.imgUrl}
-                      alt={post.title}
-                      className={post.moderationStatus === "under_investigation" ? "trail-card-img-blurred" : ""}
-                    />
-                  ) : (
-                    <div className="no-image-container">No Image</div>
-                  )}
-                </div>
+            {matchingPosts.map((post) => {
+              const isUnderInvestigation =
+                post.moderationStatus === "under_investigation";
 
-                <div className="trail-info">
-                  <h3>{post.title}</h3>
-                  {post.user?.username && (
-                    <p
-                      className="trail-card-username"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/user-moments/${post.user?._id}`);
-                      }}
-                    >
-                      {post.user.username}
-                    </p>
-                  )}
+              return (
+                <div
+                  key={post._id}
+                  className="trail-card"
+                  onClick={() => navigate(`/trail/${post._id}`)}
+                >
+                  <div className="trail-card-image-wrapper">
+                    {post.imgUrl ? (
+                      <img
+                        src={post.imgUrl}
+                        alt={post.title}
+                        className={
+                          isUnderInvestigation ? "trail-card-img-blurred" : ""
+                        }
+                      />
+                    ) : (
+                      <div className="no-image-container">No Image</div>
+                    )}
+                  </div>
+
+                  <div className="trail-info">
+                    <h3>{post.title}</h3>
+
+                    {(post.user?.username || isUnderInvestigation) && (
+                      <div className="trail-card-meta-row">
+                        {post.user?.username && (
+                          <p
+                            className="trail-card-username"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/user-moments/${post.user?._id}`);
+                            }}
+                          >
+                            {post.user.username}
+                          </p>
+                        )}
+
+                        {isUnderInvestigation && (
+                          <span className="trail-card-investigation-badge">
+                            Under Investigation
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

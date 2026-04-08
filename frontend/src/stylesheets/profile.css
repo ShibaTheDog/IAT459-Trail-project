@@ -212,7 +212,7 @@
 }
 
 .login-button {
-  background-color: #5a75f0;
+  background-color: #038220;
   color: white;
   border: none;
   padding: 10px 35px;
@@ -221,6 +221,10 @@
   font-weight: 500;
   cursor: pointer;
   margin-top: 10px;
+}
+
+.login-button:hover {
+  background-color: #026a1a;
 }
 
 .create-post-button {
@@ -243,4 +247,117 @@
 
 .bottom-buffer {
   height: 15rem;
+}
+
+/* ── Delete account modal ── */
+.profile-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.profile-modal {
+  width: 100%;
+  max-width: 460px;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 24px;
+  border: 1px solid #ddd;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
+}
+
+.profile-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.profile-modal-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #111;
+}
+
+.profile-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+}
+
+.profile-modal-close:hover {
+  color: #000;
+}
+
+.profile-modal-close:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.profile-modal-text {
+  margin-bottom: 16px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.profile-modal-error {
+  margin-top: 12px;
+  color: #b64e4e;
+  font-weight: 600;
+}
+
+.profile-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.profile-modal-cancel-button {
+  background-color: #f2f2f2;
+  color: #333;
+  border: 1px solid #bbb;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.profile-modal-cancel-button:hover {
+  background-color: #e6e6e6;
+}
+
+.profile-modal-cancel-button:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
+}
+
+.profile-modal-delete-button {
+  background-color: #b64e4e;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.profile-modal-delete-button:hover {
+  background-color: #a03d3d;
+}
+
+.profile-modal-delete-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }

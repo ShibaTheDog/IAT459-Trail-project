@@ -673,3 +673,134 @@
   background-color: #fff8e1;
   border: 1px solid #b26a00;
 }
+
+.trail-card-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.trail-card-investigation-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #b26a00;
+  background-color: #fff8e1;
+  border: 1px solid #b26a00;
+}
+
+.delete-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.delete-modal {
+  width: 100%;
+  max-width: 460px;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 24px;
+  border: 1px solid #ddd;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
+}
+
+.delete-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.delete-modal-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #111;
+}
+
+.delete-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+}
+
+.delete-modal-close:hover {
+  color: #000;
+}
+
+.delete-modal-close:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.delete-modal-text {
+  margin-bottom: 16px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.delete-modal-error {
+  margin-top: 12px;
+  color: #b64e4e;
+  font-weight: 600;
+}
+
+.delete-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.delete-modal-cancel-button {
+  background-color: #f2f2f2;
+  color: #333;
+  border: 1px solid #bbb;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.delete-modal-cancel-button:hover {
+  background-color: #e6e6e6;
+}
+
+.delete-modal-cancel-button:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
+}
+
+.delete-modal-confirm-button {
+  background-color: #b64e4e;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.delete-modal-confirm-button:hover {
+  background-color: #a03d3d;
+}
+
+.delete-modal-confirm-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
