@@ -35,10 +35,11 @@ function Moments() {
           {allMoments.map((trail) => {
             const isUnderInvestigation =
               trail.moderationStatus === "under_investigation";
+
             return (
               <div
                 key={trail._id || trail.id}
-                className="trail-card"
+                className="trail-card trail-card-moments"
                 onClick={() => navigate(`/trail/${trail._id || trail.id}`)}
               >
                 <div className="trail-card-image-wrapper">
@@ -46,24 +47,42 @@ function Moments() {
                     <img
                       src={trail.imgUrl}
                       alt={trail.title}
-                      className={isUnderInvestigation ? "trail-card-img-blurred" : ""}
+                      className={`trail-card-img ${
+                        isUnderInvestigation ? "trail-card-img-blurred" : ""
+                      }`}
                     />
                   ) : (
-                    <div className="no-image-container">No Image</div>
+                    <div className="no-image-container trail-card-no-image">
+                      No Image
+                    </div>
                   )}
                 </div>
+
                 <div className="trail-info">
                   <h3>{trail.title}</h3>
-                  {trail.user?.username && (
-                    <p
-                      className="trail-card-username"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/user-moments/${trail.user._id || trail.user.id}`);
-                      }}
-                    >
-                      {trail.user.username}
-                    </p>
+
+                  {(trail.user?.username || isUnderInvestigation) && (
+                    <div className="trail-card-meta-row">
+                      {trail.user?.username && (
+                        <p
+                          className="trail-card-username"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(
+                              `/user-moments/${trail.user._id || trail.user.id}`
+                            );
+                          }}
+                        >
+                          {trail.user.username}
+                        </p>
+                      )}
+
+                      {isUnderInvestigation && (
+                        <span className="trail-card-investigation-badge">
+                          Under Investigation
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
