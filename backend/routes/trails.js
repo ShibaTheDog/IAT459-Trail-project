@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const Trail = require("../models/Trail");
+const User = require("../models/User");
 const auth = require("../middleware/auth");
 const authorizeRole = require("../middleware/authorizeRole");
 
@@ -208,6 +209,45 @@ router.post("/:id/report", auth, async (req, res) => {
   }
 });
 
+
+// FAVORITE / UNFAVORITE A TRAIL
+// Logged-in users only
+router.post("/:id/favorite", auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const trailId = req.params.id;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const isFavorited = user.favorites.includes(trailId);
+
+    if (isFavorited) {
+      // remove from favorites
+      user.favorites = user.favorites.filter(
+        (fav) => fav.toString() !== trailId
+      );
+    } else {
+      // add to favorites
+      user.favorites.push(trailId);
+    }
+
+    await user.save();
+
+    res.json({
+      message: isFavorited
+        ? "Removed from favorites"
+        : "Added to favorites",
+      favorited: !isFavorited,
+    });
+  } catch (err) {
+    console.error("FAVORITE ERROR:", err.message);
+    res.status(500).json({ error: "Failed to update favorite" });
+  }
+});
 
 //Admin view that can retrieve posts from a certain user: 
 //GET: ADMIN ONLY

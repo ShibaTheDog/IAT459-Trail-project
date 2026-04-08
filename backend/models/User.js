@@ -23,6 +23,15 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user",
     },
+    favorites: {
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Trail",
+        },
+      ],
+      default: [],
+    },
   },
   { timestamps: true }
 );

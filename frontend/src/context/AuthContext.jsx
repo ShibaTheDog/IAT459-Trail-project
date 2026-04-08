@@ -152,6 +152,31 @@ export function AuthProvider({ children }) {
     };
   }, [token, validateSession]);
 
+  const refreshUser = useCallback(async () => {
+    if (!token) return null;
+    
+    try {
+      const res = await fetch("http://localhost:5000/api/users/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      if (!res.ok) {
+        throw new Error("Failed to refresh user data");
+      }
+      
+      const data = await res.json();
+      const freshUserData = data.user;
+      
+      localStorage.setItem("user", JSON.stringify(freshUserData));
+      setUser(freshUserData);
+      
+      return freshUserData;
+    } catch (err) {
+      console.error("Failed to refresh user:", err);
+      return null;
+    }
+  }, [token]);
+
   const value = useMemo(
     () => ({
       token,
@@ -160,8 +185,9 @@ export function AuthProvider({ children }) {
       login,
       logout,
       validateSession,
+      refreshUser,
     }),
-    [token, user, authChecked, login, logout, validateSession]
+    [token, user, authChecked, login, logout, validateSession, refreshUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

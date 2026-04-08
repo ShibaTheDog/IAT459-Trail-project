@@ -23,7 +23,10 @@ function TrailDetail() {
   const [reportSuccess, setReportSuccess] = useState("");
 
   const navigate = useNavigate();
-  const { token, user } = useContext(AuthContext);
+  // const { token, user } = useContext(AuthContext);
+  const { token, user, refreshUser } = useContext(AuthContext);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
 
   useEffect(() => {
     fetch(`http://localhost:5000/api/trails/${id}`)
@@ -40,6 +43,51 @@ function TrailDetail() {
       });
   }, [id]);
 
+  useEffect(() => {
+    if (user && refreshUser) {
+      refreshUser();
+    }
+  }, [id, user, refreshUser]); 
+
+  useEffect(() => {
+    if (!trail || !user) return;
+    const favorited = (user.favorites || []).some((fav) => {
+      const favId = typeof fav === "string" ? fav : fav._id;
+      return String(favId) === String(trail._id);
+    });
+    setIsFavorited(favorited);
+  }, [trail, user]);
+
+  async function handleAdminDelete() {
+    const confirmDelete = window.confirm(
+      "Admin: Are you sure you want to delete this post?"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      setDeleteLoading(true);
+      const response = await fetch(
+        `http://localhost:5000/api/trails/admin/${id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to delete trail");
+      }
+
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("Admin delete error:", err);
+      alert(err.message);
+    } finally {
+      setDeleteLoading(false);
+    }
+  }
+  
   function openDeleteModal(mode) {
     setDeleteMode(mode);
     setDeleteError("");
@@ -87,6 +135,33 @@ function TrailDetail() {
       setDeleteError(err.message || "Failed to delete trail");
     } finally {
       setDeleteLoading(false);
+    }
+  }
+
+  async function handleFavoriteToggle() {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    setFavoriteLoading(true);
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/trails/${id}/favorite`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to favorite");
+
+      await refreshUser();
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    } finally {
+      setFavoriteLoading(false);
     }
   }
 
@@ -297,6 +372,20 @@ function TrailDetail() {
                       onClick={() => navigate(`/trail-result/${match.id}`)}
                     >
                       View Trail
+                    </button>
+                  )}
+
+                  {user && (
+                    <button
+                      className="favorite-button"
+                      onClick={handleFavoriteToggle}
+                      disabled={favoriteLoading}
+                    >
+                      {favoriteLoading
+                        ? "Loading..."
+                        : isFavorited
+                        ? "★ Unfavorite"
+                        : "☆ Favorite"}
                     </button>
                   )}
                 </div>
