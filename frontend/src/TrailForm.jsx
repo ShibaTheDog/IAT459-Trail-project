@@ -1,3 +1,5 @@
+// page for users to create new posts
+
 import { useContext, useState } from "react";
 import "./stylesheets/dashboard.css";
 import "./stylesheets/detail.css";
@@ -23,6 +25,7 @@ function TrailForm() {
   const [searchQuery, setSearchQuery] = useState(preselectedTrail);
   const [searchResults, setSearchResults] = useState([]);
 
+  // handle input change view
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -32,6 +35,7 @@ function TrailForm() {
     }
   };
 
+  // handles image drag for local file
   const handleDrag = (file) => {
     if (file && file.type.startsWith("image/")) {
       const localPreview = URL.createObjectURL(file);
@@ -39,6 +43,7 @@ function TrailForm() {
     }
   };
 
+  // handle image drop
   const handleDrop = (e) => {
     e.preventDefault();
     if (!user) return;
@@ -46,6 +51,7 @@ function TrailForm() {
     handleDrag(file);
   };
 
+  // handle trail search input, filtering results by the trail dataset in dropdown
   function handleSearch(e) {
     const value = e.target.value;
     setSearchQuery(value);
@@ -60,12 +66,15 @@ function TrailForm() {
     );
     setSearchResults(filtered.slice(0, 5));
   }
+
+  // selecting a trail from the dataset 
   const selectTrail = (trail) => {
     setFormData({ ...formData, tag: trail.trailTitle });
     setSearchQuery(trail.trailTitle);
     setSearchResults([]);
   };
 
+  // submission, using POST request to backend, checking for authentication
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -90,6 +99,7 @@ function TrailForm() {
     }
   };
 
+  // Visual UI for creating a trail post
   return (
     <div className="dashboard-page">
       <div className="back-button-container">

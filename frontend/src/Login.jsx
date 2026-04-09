@@ -1,3 +1,5 @@
+// page for user authentication
+
 import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
@@ -18,6 +20,7 @@ function Login() {
 
   const navigate = useNavigate();
 
+  // handles login, storing token if succeful, error if not, and redirecting to dashboard
  async function handleLogin(e) {
   e.preventDefault();
   setError("");
@@ -50,6 +53,7 @@ function Login() {
   }
 }
 
+  // UI visualizaiton of login screen
   return (
     <div className="auth-page-container">
       <div className="auth-hero-img-container">
