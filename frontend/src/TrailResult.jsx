@@ -1,13 +1,16 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { AuthContext } from "./context/AuthContext";
 import { dataSet } from "./assets/dataSet";
 import "./stylesheets/detail.css";
 
 function TrailResult() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user, token } = useContext(AuthContext);
 
   const [trails, setTrails] = useState([]);
+  const [currentUserProfile, setCurrentUserProfile] = useState(null);
 
   const trail = dataSet.find((t) => t.id === id);
 
@@ -17,6 +20,36 @@ function TrailResult() {
       .then((data) => setTrails(data))
       .catch((err) => console.error("Error fetching trails:", err));
   }, []);
+
+  useEffect(() => {
+    if (!user || !token) {
+      setCurrentUserProfile(null);
+      return;
+    }
+
+    fetch("http://localhost:5000/api/users/me", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => setCurrentUserProfile(data.user))
+      .catch((err) => {
+        console.error("Error fetching current user profile:", err);
+        setCurrentUserProfile(null);
+      });
+  }, [user, token]);
+
+  function isFavoritedByCurrentUser(post) {
+    if (!currentUserProfile || !Array.isArray(currentUserProfile.favorites)) {
+      return false;
+    }
+
+    return currentUserProfile.favorites.some((favoriteTrail) => {
+      const favoriteTrailId = favoriteTrail?._id || favoriteTrail;
+      return String(favoriteTrailId) === String(post._id || post.id);
+    });
+  }
 
   if (!trail) {
     return (
@@ -148,7 +181,15 @@ function TrailResult() {
                   </div>
 
                   <div className="trail-info">
-                    <h3>{post.title}</h3>
+                    <div className="trail-card-title-row">
+                      <h3>{post.title}</h3>
+
+                      {isFavoritedByCurrentUser(post) && (
+                        <span className="trail-favorite-badge" title="Favorited">
+                          ★
+                        </span>
+                      )}
+                    </div>
 
                     {(post.user?.username || isUnderInvestigation) && (
                       <div className="trail-card-meta-row">

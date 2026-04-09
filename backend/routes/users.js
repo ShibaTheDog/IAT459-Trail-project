@@ -122,4 +122,30 @@ router.delete("/admin/users/:id", auth, authorizeRole("admin"), async (req, res)
   }
 });
 
+//USERS: GET 'FAVORITED' POSTS
+router.get("/me", auth, async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user.id)
+      .select("-password")
+      .populate("favorites", "_id");
+
+    if (!currentUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({
+      user: {
+        _id: currentUser._id,
+        username: currentUser.username,
+        email: currentUser.email,
+        role: currentUser.role,
+        favorites: currentUser.favorites,
+      },
+    });
+  } catch (err) {
+    console.error("GET /api/users/me error:", err.message);
+    res.status(500).json({ error: "Failed to fetch current user" });
+  }
+});
+
 module.exports = router;
