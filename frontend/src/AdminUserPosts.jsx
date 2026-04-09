@@ -1,3 +1,5 @@
+// this page allows admin to view all of a sigular users posts on admin specifc page
+
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./stylesheets/adminStylesheet.css";
@@ -11,10 +13,12 @@ function AdminUserPosts() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
 
+  // fetch posts for userID and search input change
   useEffect(() => {
     fetchUserPosts();
   }, [userId, search]);
 
+  // fetch posts from backend for particula user
   async function fetchUserPosts() {
     try {
       setLoading(true);
@@ -52,6 +56,7 @@ function AdminUserPosts() {
     }
   }
 
+  // visual UI for AdminUserPosts
   return (
     <div className="admin-page">
       <div className="admin-back-row">

@@ -1,3 +1,5 @@
+// handles user registration
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -14,6 +16,7 @@ function Register() {
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
+  // sends post request to back end, with success and error depending on duplicant, and sending to login screen
   const handleRegister = async (e) => {
   e.preventDefault();
   setError("");
@@ -51,6 +54,7 @@ function Register() {
   }
 };
 
+  // visual UI for registration page
   return (
     <div className="auth-page-container">
       <div className="auth-hero-img-container">

@@ -1,3 +1,5 @@
+// this page is to showcase posts from a single user, based off Moments
+
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./stylesheets/dashboard.css";
@@ -8,6 +10,7 @@ function UserMoments() {
   const navigate = useNavigate();
   const { userId } = useParams();
 
+  // first retrieves all posts
   useEffect(() => {
     fetch("http://localhost:5000/api/trails")
       .then((res) => res.json())
@@ -15,16 +18,18 @@ function UserMoments() {
       .catch((err) => console.error("Error fetching trails:", err));
   }, []);
 
+  // filter posts so they dont show deleted posts, and filter to only show posts of selected user
   const userMoments = trails.filter(
     (trail) =>
       trail.moderationStatus !== "removed" &&
       trail.user?._id === userId
   );
 
-  // Get username from any post — including under_investigation ones
+  // retrieves username for header
   const username =
     trails.find((t) => t.user?._id === userId)?.user?.username || "User";
 
+  // visual UI of userMoments
   return (
     <div className="moments-page-container">
       <div className="moments-back-row">

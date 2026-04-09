@@ -1,3 +1,6 @@
+// dashboard for admin page, split into post moderation shwocasing all reported posts, and user moderation
+// admin can delete posts or users from the section
+
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
@@ -37,6 +40,7 @@ function AdminModeration() {
     onConfirm: null,
   });
 
+  // open confirmation modal, changing depending on situation
   function openConfirmModal({
     title,
     message,
@@ -54,20 +58,24 @@ function AdminModeration() {
     });
   }
 
+  // close the modal
   function closeConfirmModal() {
     setConfirmModal((prev) => ({ ...prev, open: false, onConfirm: null }));
   }
 
+  // load reported posts on mount
   useEffect(() => {
     fetchReportedTrails();
   }, []);
 
+  // load users when tab is switched to users section
   useEffect(() => {
     if (activeTab === "users") {
       fetchUsers();
     }
   }, [activeTab, userSearch, userPage]);
 
+  // fetch all the the reported trail posts based on tag in database
   async function fetchReportedTrails() {
     try {
       setLoading(true);
@@ -93,6 +101,7 @@ function AdminModeration() {
     }
   }
 
+  // fetch all users for admin management
   async function fetchUsers() {
     try {
       setUsersLoading(true);
@@ -147,6 +156,7 @@ function AdminModeration() {
     }
   }
 
+  // deleted a post using DELEET on fetch
   async function execDeletePost(trailId) {
     try {
       setDeleteLoadingId(trailId);
@@ -174,6 +184,7 @@ function AdminModeration() {
     }
   }
 
+  // confirmation on delete
   function handleDeletePost(trailId) {
     openConfirmModal({
       title: "Delete Post",
@@ -187,6 +198,7 @@ function AdminModeration() {
     });
   }
 
+  // to resolve a post if deemed not offensive
   async function execResolvePost(trailId) {
     try {
       setResolveLoadingId(trailId);
@@ -217,6 +229,7 @@ function AdminModeration() {
     }
   }
 
+  // confirmation if you want to remove the reported status
   function handleResolvePost(trailId) {
     openConfirmModal({
       title: "Resolve Report",
@@ -230,6 +243,7 @@ function AdminModeration() {
     });
   }
 
+  // to delete a certain user using DELETE
   async function execDeleteUser(targetUser) {
     try {
       setDeleteUserLoadingId(targetUser._id);
@@ -260,6 +274,7 @@ function AdminModeration() {
     }
   }
 
+  // confirmation prompt if you want to delete that user
   function handleDeleteUser(targetUser) {
     openConfirmModal({
       title: "Delete Account",
@@ -273,8 +288,10 @@ function AdminModeration() {
     });
   }
 
+  // is user does not have correct admin role does not go through
   if (!user || user.role !== "admin") return null;
 
+  // visual UI of adminModeration page
   return (
     <div className="admin-page">
       <div className="admin-back-row">

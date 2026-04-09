@@ -1,3 +1,5 @@
+// this is handling the reporting of other peoples posts
+
 import { useState } from "react";
 import "./stylesheets/report.css";
 
@@ -8,6 +10,7 @@ function ReportTrailForm({ trailId, onSuccess }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  // submission by sending post request to backend, using token
   async function handleSubmit(e) {
     e.preventDefault();
     setSubmitting(true);
@@ -46,6 +49,7 @@ function ReportTrailForm({ trailId, onSuccess }) {
     }
   }
 
+  // visual UI for the submit form for reporting posts
   return (
     <form onSubmit={handleSubmit} className="report-form">
       <div className="report-form-group">

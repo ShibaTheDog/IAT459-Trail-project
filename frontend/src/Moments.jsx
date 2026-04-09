@@ -1,3 +1,5 @@
+// this is to showcase all the user posts on a single page not on dashboard highlihgt section
+
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
@@ -11,6 +13,7 @@ function Moments() {
   const navigate = useNavigate();
   const { user, token } = useContext(AuthContext);
 
+  // fetch all trails on mount
   useEffect(() => {
     fetch("http://localhost:5000/api/trails")
       .then((res) => res.json())
@@ -18,6 +21,7 @@ function Moments() {
       .catch((err) => console.error("Error fetching trails:", err));
   }, []);
 
+  // fetch user loged in profile with token
   useEffect(() => {
     if (!user || !token) {
       setCurrentUserProfile(null);
@@ -37,6 +41,7 @@ function Moments() {
       });
   }, [user, token]);
 
+  // check if a trail is facorited by current user
   function isFavoritedByCurrentUser(trail) {
     if (!currentUserProfile || !Array.isArray(currentUserProfile.favorites)) {
       return false;
@@ -48,10 +53,12 @@ function Moments() {
     });
   }
 
+  // filter out trails marked as removed, not showing them in the UI
   const allMoments = trails.filter(
     (trail) => trail.moderationStatus !== "removed"
   );
 
+  // the visual UI of all moments
   return (
     <div className="moments-page-container">
       <div className="moments-page-header">

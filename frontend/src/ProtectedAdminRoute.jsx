@@ -1,3 +1,6 @@
+// used to protecte routes that require authentication for admin only
+// if user is not logged in redirected to login, if user not admin refdirected to dashboard
+
 import { useContext } from "react";
 import { Navigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
