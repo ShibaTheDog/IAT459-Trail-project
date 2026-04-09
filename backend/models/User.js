@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 
+
+//User schema containing user information that is referred to throughout the app
 const userSchema = new mongoose.Schema(
   {
     username: {
