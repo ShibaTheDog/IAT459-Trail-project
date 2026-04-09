@@ -251,8 +251,6 @@ router.post("/:id/favorite", auth, async (req, res) => {
 
 //Admin view that can retrieve posts from a certain user: 
 //GET: ADMIN ONLY
-
-
 router.get(
   "/admin/user/:userId/posts",
   auth,
