@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 
+
+//Trail report schema containing information about the type of reported post and why its offensive, which is reviewed by admininstrators.
 const reportSchema = new mongoose.Schema(
   {
     reportedBy: {
@@ -26,6 +28,7 @@ const reportSchema = new mongoose.Schema(
   { _id: false }
 );
 
+//Trail schema containing information that will be shown to the users when they review trails. 
 const trailSchema = new mongoose.Schema({
   title: {
     type: String,
