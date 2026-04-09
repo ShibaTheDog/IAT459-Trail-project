@@ -1,3 +1,5 @@
+// page to authenticate state for whole page, storing and providing JWT token and user data in local storage
+
 import { jwtDecode } from "jwt-decode";
 import {
   createContext,
@@ -10,6 +12,7 @@ import {
 
 export const AuthContext = createContext();
 
+// decode the JWT token, if not show error
 function safeDecodeToken(token) {
   try {
     return jwtDecode(token);
@@ -19,6 +22,7 @@ function safeDecodeToken(token) {
   }
 }
 
+// retrieves stored user from localStorage
 function getStoredUser() {
   const storedUser = localStorage.getItem("user");
 
@@ -43,6 +47,7 @@ function getStoredUser() {
   return decoded;
 }
 
+// component to give authenticate throughout app
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
   const [user, setUser] = useState(getStoredUser);
@@ -52,6 +57,7 @@ export function AuthProvider({ children }) {
 
   const requestVersionRef = useRef(0);
 
+  // logs the user out, removing token and user from local storage
   const logout = useCallback(() => {
     requestVersionRef.current += 1;
     localStorage.removeItem("token");
@@ -61,6 +67,7 @@ export function AuthProvider({ children }) {
     setAuthChecked(true);
   }, []);
 
+  // logs the user in, setting token and user in local storage 
   const login = useCallback((newToken, newUser = null) => {
     requestVersionRef.current += 1;
 
@@ -80,6 +87,7 @@ export function AuthProvider({ children }) {
     setAuthChecked(true);
   }, []);
 
+  // calls api users from the backend, updating if valid, logs out if not
   const validateSession = useCallback(async () => {
     const tokenAtStart = localStorage.getItem("token");
     const requestVersionAtStart = requestVersionRef.current;
@@ -148,6 +156,7 @@ export function AuthProvider({ children }) {
     }
   }, [logout]);
 
+  //runs session for validaiton when loading in and when the token changes, as well as automatic validation, and refresh/focus
   useEffect(() => {
     if (!token) {
       setAuthChecked(true);
@@ -180,6 +189,7 @@ export function AuthProvider({ children }) {
     };
   }, [token, validateSession]);
 
+  // manually refreshes user data from backend for retrieving favorited data
   const refreshUser = useCallback(async () => {
     const tokenAtStart = localStorage.getItem("token");
     const requestVersionAtStart = requestVersionRef.current;
@@ -232,6 +242,7 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  // memovized values
   const value = useMemo(
     () => ({
       token,

@@ -1,3 +1,5 @@
+// desplays information on a specific trail, and related user posts of that trail
+
 import { useParams, useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "./context/AuthContext";
@@ -12,8 +14,10 @@ function TrailResult() {
   const [trails, setTrails] = useState([]);
   const [currentUserProfile, setCurrentUserProfile] = useState(null);
 
+  // find trail data from local dataset in assets
   const trail = dataSet.find((t) => t.id === id);
 
+  // fetch all posts of the trail in backend
   useEffect(() => {
     fetch("http://localhost:5000/api/trails")
       .then((res) => res.json())
@@ -21,6 +25,7 @@ function TrailResult() {
       .catch((err) => console.error("Error fetching trails:", err));
   }, []);
 
+  // checks for users profile 
   useEffect(() => {
     if (!user || !token) {
       setCurrentUserProfile(null);
@@ -40,6 +45,7 @@ function TrailResult() {
       });
   }, [user, token]);
 
+  // checks favorited post
   function isFavoritedByCurrentUser(post) {
     if (!currentUserProfile || !Array.isArray(currentUserProfile.favorites)) {
       return false;
@@ -51,6 +57,7 @@ function TrailResult() {
     });
   }
 
+  // checks if there is not trail, returning back to dashboard
   if (!trail) {
     return (
       <div className="dashboard-container">
@@ -65,6 +72,7 @@ function TrailResult() {
     );
   }
 
+  // what filters posts of this trail
   const matchingPosts = trails.filter(
     (post) =>
       post.tag &&
@@ -72,6 +80,7 @@ function TrailResult() {
       post.tag.toLowerCase().trim() === trail.trailTitle.toLowerCase().trim()
   );
 
+  // visual UI for trails
   return (
     <div className="dashboard-page">
       <div className="back-button-container">

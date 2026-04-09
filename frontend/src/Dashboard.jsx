@@ -1,3 +1,5 @@
+//main page of app
+
 import { useContext, useEffect, useRef, useState } from "react";
 import "./stylesheets/dashboard.css";
 import { useNavigate } from "react-router-dom";
@@ -62,6 +64,7 @@ function Dashboard() {
     streetViewControl: false,
   };
 
+  // fetches trail posts from backend
   useEffect(() => {
     fetch("http://localhost:5000/api/trails")
       .then((res) => res.json())
@@ -69,6 +72,7 @@ function Dashboard() {
       .catch((err) => console.error("Error fetching trails:", err));
   }, []);
 
+  // if user is logged in, fetches their own posts
   useEffect(() => {
     if (!user || !token) {
       setCurrentUserProfile(null);
@@ -88,6 +92,7 @@ function Dashboard() {
       });
   }, [user, token]);
 
+  // removes search dropdown when clicking off
   useEffect(() => {
     function handleClickOutside(e) {
       if (
@@ -103,10 +108,12 @@ function Dashboard() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // disables trail view in dashboard if it is a reported post
   const isTrailFlagged = (trail) =>
     trail.moderationStatus === "under_investigation" ||
     trail.moderationStatus === "removed";
 
+  // checks users favorited trails
   function isFavoritedByCurrentUser(trail) {
     if (!currentUserProfile || !Array.isArray(currentUserProfile.favorites)) {
       return false;
@@ -118,6 +125,7 @@ function Dashboard() {
     });
   }
 
+  // handles search for trails and filtering of the trail search
   function handleSearch(e) {
     const value = e.target.value;
     setSearchQuery(value);
@@ -153,6 +161,7 @@ function Dashboard() {
     setSearchResults(filtered.slice(0, 8));
   }
 
+  // highlihgts matchign trail in search
   function highlightMatch(text, query) {
     if (!query.trim()) return text;
     const idx = text.toLowerCase().indexOf(query.toLowerCase());
@@ -167,6 +176,7 @@ function Dashboard() {
     );
   }
 
+  //seperates users own posts to others posts
   const myTrails = user
     ? trails.filter((trail) => {
         const postUserId = trail.user?._id || trail.user;
@@ -183,6 +193,7 @@ function Dashboard() {
       })
     : trails.filter((trail) => !isTrailFlagged(trail));
 
+  // rendering of the UI
   return (
     <>
       <div className="dashboard-container">

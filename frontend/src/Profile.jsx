@@ -1,3 +1,5 @@
+// showcase logged in users profile information, stats, own posts, favorited posts
+
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
@@ -13,6 +15,7 @@ function Profile() {
   const navigate = useNavigate();
   const { user, logout, refreshUser } = useContext(AuthContext);
 
+  // fetch all trails and if user is not authenticated go to dashboard
   useEffect(() => {
     if (!user) {
       navigate("/dashboard");
@@ -29,6 +32,7 @@ function Profile() {
       .catch((err) => console.error("Error fetching trails:", err));
   }, [user, navigate]);
 
+  // filter trails so only the posts created by logged in user shows
   const myTrails = user
     ? trails.filter((trail) => {
         const postUserId = trail.user?._id || trail.user;
@@ -37,14 +41,17 @@ function Profile() {
       })
     : [];
 
+  // calculate the amount of unique trails visited
   const uniqueTrails = [
     ...new Set(
       myTrails.map((post) => post.tag?.toLowerCase().trim()).filter(Boolean)
     ),
   ];
 
+  // calculated of length of trails visited
   const trailsVisitedCount = uniqueTrails.length;
 
+  // calculates teh total hours of hikes on trails based off posts
   const totalHoursHiked = uniqueTrails.reduce((total, tag) => {
     const matchingTrail = dataSet.find(
       (t) => t.trailTitle?.toLowerCase().trim() === tag
@@ -57,11 +64,13 @@ function Profile() {
     return total;
   }, 0);
 
+  // handle logout
   function handleLogout() {
     logout();
     navigate("/dashboard");
   }
 
+  // open/close handle
   function openDeleteModal() {
     setDeleteError("");
     setShowDeleteModal(true);
@@ -73,6 +82,7 @@ function Profile() {
     setDeleteError("");
   }
 
+  // confirm deletion of account
   async function confirmDeleteAccount() {
     try {
       setDeleteLoading(true);
@@ -111,6 +121,7 @@ function Profile() {
 
   if (!user) return null;
 
+  // visual rendering of profile page
   return (
     <div className="profile-container">
       <div className="profile-nav">

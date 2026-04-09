@@ -1,3 +1,5 @@
+// create a root for react, and render app
+
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";

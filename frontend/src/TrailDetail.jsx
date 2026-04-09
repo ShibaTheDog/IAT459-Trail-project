@@ -1,3 +1,5 @@
+// to view a single detailed post
+
 import { useContext, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
@@ -23,11 +25,11 @@ function TrailDetail() {
   const [reportSuccess, setReportSuccess] = useState("");
 
   const navigate = useNavigate();
-  // const { token, user } = useContext(AuthContext);
   const { token, user, refreshUser } = useContext(AuthContext);
   const [isFavorited, setIsFavorited] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
 
+  // Fetch trail detail on mount and id change
   useEffect(() => {
     fetch(`http://localhost:5000/api/trails/${id}`)
       .then((res) => {
@@ -43,12 +45,14 @@ function TrailDetail() {
       });
   }, [id]);
 
+  // refreshes page and updates UI for favoriting post 
   useEffect(() => {
     if (user && refreshUser) {
       refreshUser();
     }
   }, [id, user, refreshUser]); 
 
+  // checks if user favorites the post (which then causes refreshUser trigger)
   useEffect(() => {
     if (!trail || !user) return;
     const favorited = (user.favorites || []).some((fav) => {
@@ -58,6 +62,7 @@ function TrailDetail() {
     setIsFavorited(favorited);
   }, [trail, user]);
 
+  // admin fucntion to delete trail directly, needs proper token to do so
   async function handleAdminDelete() {
     const confirmDelete = window.confirm(
       "Admin: Are you sure you want to delete this post?"
@@ -88,18 +93,21 @@ function TrailDetail() {
     }
   }
   
+  // open the delete dropdown for admin or owner of post
   function openDeleteModal(mode) {
     setDeleteMode(mode);
     setDeleteError("");
     setShowDeleteModal(true);
   }
 
+  // close the delete section for admin or owner of post
   function closeDeleteModal() {
     if (deleteLoading) return;
     setShowDeleteModal(false);
     setDeleteError("");
   }
 
+  // confirm delete action
   async function confirmDelete() {
     try {
       setDeleteLoading(true);
@@ -138,6 +146,7 @@ function TrailDetail() {
     }
   }
 
+  // toggle favorite/unfavorite post
   async function handleFavoriteToggle() {
     if (!user) {
       navigate("/login");
@@ -165,6 +174,7 @@ function TrailDetail() {
     }
   }
 
+  // open report dashboard
   function openReportModal() {
     if (!user) {
       setShowLoginPrompt(true);
@@ -182,12 +192,14 @@ function TrailDetail() {
     setShowReportModal(true);
   }
 
+  // close report
   function closeReportModal() {
     if (reportLoading) return;
     setShowReportModal(false);
     setReportError("");
-  }
+  }  
 
+  // submits the reprot
   async function handleReportSubmit(e) {
     e.preventDefault();
 
@@ -246,6 +258,7 @@ function TrailDetail() {
     }
   }
 
+  // navigagte to login on page error or go back
   if (pageError) {
     return (
       <div className="dashboard-container">
@@ -258,17 +271,21 @@ function TrailDetail() {
     );
   }
 
+  // show loading while fetching
   if (!trail) {
     return <div className="dashboard-container">Loading...</div>;
   }
 
+  // current user id
   const currentUserId = user?.id || user?._id;
 
+  // checks if user id matches owner of post
   const isOwner =
     user &&
     trail.user &&
     (trail.user._id === currentUserId || trail.user === currentUserId);
 
+  // checks if current user has reported this post
   const hasUserReported =
     !!currentUserId &&
     Array.isArray(trail.reports) &&
@@ -279,6 +296,7 @@ function TrailDetail() {
 
   const moderationStatus = trail.moderationStatus || "active";
 
+  // visual UI for whole page
   return (
     <div className="dashboard-page">
       <div className="back-button-container">

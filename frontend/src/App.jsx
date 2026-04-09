@@ -1,3 +1,5 @@
+// main applicaiton that sets up routing, authentication context, and navigation
+
 import {
   Route,
   BrowserRouter as Router,
@@ -23,6 +25,7 @@ import Moments from "./Moments";
 import AdminUserPosts from "./AdminUserPosts";
 import UserMoments from "./UserMoments";
 
+// handles UI changes between pages
 function AppContent() {
   const location = useLocation();
   const hideNavbar = ["/register", "/login", "/profile"].includes(
@@ -35,14 +38,6 @@ function AppContent() {
       <div className={!hideNavbar ? "page-with-navbar" : ""}>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          {/* <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          /> */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -51,7 +46,6 @@ function AppContent() {
           <Route path="/moments" element={<Moments />} />
           <Route path="/profile" element={<Profile />} />{" "}
           <Route path="/user-moments/:userId" element={<UserMoments />} />
-          {/* probably needs to be protected or something*/}
           <Route
             path="/create-post"
             element={
@@ -60,6 +54,7 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+          {/* routes only visible in UI for admin */}
           <Route
             path="/admin/users/:userId/posts"
             element={
@@ -82,6 +77,7 @@ function AppContent() {
   );
 }
 
+// sets up app with authentication of components and routes between pages
 function App() {
   return (
     <AuthProvider>

@@ -1,12 +1,17 @@
+// sets up what the global navigation bar across different pages in the app
+
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
 import "./stylesheets/navbar.css";
 
 function Navbar() {
+  // gets current user from auth
   const { user } = useContext(AuthContext);
+  // routing for between pages
   const navigate = useNavigate();
 
+  // sets up how teh UI actually looks
   return (
     <nav className="global-navbar">
       <span className="global-navbar-logo" onClick={() => navigate("/dashboard")}>
