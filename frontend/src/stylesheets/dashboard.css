@@ -818,3 +818,31 @@
   background-color: #d9d9d9;
   cursor: not-allowed;
 }
+
+.trail-card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.trail-card-title-row h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.trail-favorite-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #b26a00;
+  background-color: #fff8e1;
+  border: 1px solid #b26a00;
+}

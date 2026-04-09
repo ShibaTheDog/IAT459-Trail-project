@@ -13,6 +13,7 @@ import { dataSet } from "./assets/dataSet";
 function Dashboard() {
   const [trails, setTrails] = useState([]);
   const [selectedTrail, setSelectedTrail] = useState(null);
+  const [currentUserProfile, setCurrentUserProfile] = useState(null);
 
   const [isDifficultyDropdownOpen, setIsDifficultyDropdownOpen] =
     useState(false);
@@ -20,18 +21,14 @@ function Dashboard() {
     useState(false);
   const [isDogFriendlyDropdownOpen, setIsDogFriendlyDropdownOpen] =
     useState(false);
-  // const [dogFriendlyFilter, setDogFriendlyFilter] = useState("all");
-  const [showDogFriendly, setShowDogFriendly] = 
-    useState(true);
-  const [showNotDogFriendly, setShowNotDogFriendly] = 
-    useState(true);
+  const [showDogFriendly, setShowDogFriendly] = useState(true);
+  const [showNotDogFriendly, setShowNotDogFriendly] = useState(true);
   const [isDistanceDropdownOpen, setIsDistanceDropdownOpen] = useState(false);
   const [minDistance, setMinDistance] = useState(0);
   const [maxDistance, setMaxDistance] = useState(30);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
+  const { user, token } = useContext(AuthContext);
 
   const containerStyle = {
     width: "100%",
@@ -54,13 +51,13 @@ function Dashboard() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  // const [showOnlyWithPosts, setShowOnlyWithPosts] = useState(false);
   const [showWithPosts, setShowWithPosts] = useState(true);
   const [showWithoutPosts, setShowWithoutPosts] = useState(true);
 
   const searchWrapperRef = useRef(null);
+
   const mapOptions = {
-    mapTypeControl: false,  
+    mapTypeControl: false,
     fullscreenControl: false,
     streetViewControl: false,
   };
@@ -73,12 +70,35 @@ function Dashboard() {
   }, []);
 
   useEffect(() => {
+    if (!user || !token) {
+      setCurrentUserProfile(null);
+      return;
+    }
+
+    fetch("http://localhost:5000/api/users/me", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => setCurrentUserProfile(data.user))
+      .catch((err) => {
+        console.error("Error fetching current user profile:", err);
+        setCurrentUserProfile(null);
+      });
+  }, [user, token]);
+
+  useEffect(() => {
     function handleClickOutside(e) {
-      if (searchWrapperRef.current && !searchWrapperRef.current.contains(e.target)) {
+      if (
+        searchWrapperRef.current &&
+        !searchWrapperRef.current.contains(e.target)
+      ) {
         setSearchResults([]);
         setSearchQuery("");
       }
     }
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -86,6 +106,17 @@ function Dashboard() {
   const isTrailFlagged = (trail) =>
     trail.moderationStatus === "under_investigation" ||
     trail.moderationStatus === "removed";
+
+  function isFavoritedByCurrentUser(trail) {
+    if (!currentUserProfile || !Array.isArray(currentUserProfile.favorites)) {
+      return false;
+    }
+
+    return currentUserProfile.favorites.some((favoriteTrail) => {
+      const favoriteTrailId = favoriteTrail?._id || favoriteTrail;
+      return String(favoriteTrailId) === String(trail._id || trail.id);
+    });
+  }
 
   function handleSearch(e) {
     const value = e.target.value;
@@ -101,21 +132,9 @@ function Dashboard() {
     let filtered = dataSet.filter(
       (trail) =>
         trail.trailTitle.toLowerCase().includes(q) ||
-        trail.region.toLowerCase().includes(q),
+        trail.region.toLowerCase().includes(q)
     );
 
-
-    // if (showOnlyWithPosts) {
-    //   filtered = filtered.filter((trail) =>
-    //     trails.some(
-    //       (post) =>
-    //         !isTrailFlagged(post) &&
-    //         post.tag &&
-    //         post.tag.toLowerCase().trim() ===
-    //           trail.trailTitle.toLowerCase().trim(),
-    //     ),
-    //   );
-    // }
     filtered = filtered.filter((trail) => {
       const hasPost = trails.some(
         (post) =>
@@ -138,6 +157,7 @@ function Dashboard() {
     if (!query.trim()) return text;
     const idx = text.toLowerCase().indexOf(query.toLowerCase());
     if (idx === -1) return text;
+
     return (
       <>
         {text.slice(0, idx)}
@@ -155,8 +175,6 @@ function Dashboard() {
       })
     : [];
 
-  const otherTrails = trails.filter((trail) => !isTrailFlagged(trail));
-
   const topHikingMoments = user
     ? trails.filter((trail) => {
         const postUserId = trail.user?._id || trail.user;
@@ -168,15 +186,12 @@ function Dashboard() {
   return (
     <>
       <div className="dashboard-container">
-        {/* ── Hero Section ── */}
         <div className="hero-section">
           <div className="hero-overlay" />
 
           <div className="hero-content">
             <h1 className="hero-title">
-              {user
-                ? `Welcome back, ${user.username}`
-                : "Welcome to TrailTracker"}
+              {user ? `Welcome back, ${user.username}` : "Welcome to TrailTracker"}
             </h1>
 
             <div className="hero-search-wrapper" ref={searchWrapperRef}>
@@ -207,42 +222,14 @@ function Dashboard() {
                   >
                     Filter
                     <span
-                      className={`dropdown-arrow ${isPostFilterDropdownOpen ? "open" : ""}`}
+                      className={`dropdown-arrow ${
+                        isPostFilterDropdownOpen ? "open" : ""
+                      }`}
                     >
                       &#9662;
                     </span>
                   </button>
 
-                  {/* {isPostFilterDropdownOpen && (
-                    <div className="search-filter-dropdown">
-                      <label className="dropdown-item">
-                        <input
-                          type="radio"
-                          name="postFilter"
-                          checked={!showOnlyWithPosts}
-                          onChange={() => {
-                            setShowOnlyWithPosts(false);
-                            setIsPostFilterDropdownOpen(false);
-                          }}
-                        />
-                        All Trails
-                      </label>
-
-                      <label className="dropdown-item">
-                        <input
-                          type="radio"
-                          name="postFilter"
-                          checked={showOnlyWithPosts}
-                          onChange={() => {
-                            setShowOnlyWithPosts(true);
-                            setIsPostFilterDropdownOpen(false);
-                          }}
-                        />
-                        Only With Posts
-                      </label>
-                    </div>
-                  )} */}
-                  
                   {isPostFilterDropdownOpen && (
                     <div className="search-filter-dropdown">
                       <label className="dropdown-item">
@@ -317,14 +304,25 @@ function Dashboard() {
                   ) : (
                     <div className="no-image-container">No Image</div>
                   )}
+
                   <div className="trail-info">
-                    <h3>{trail.title}</h3>
+                    <div className="trail-card-title-row">
+                      <h3>{trail.title}</h3>
+                      {isFavoritedByCurrentUser(trail) && (
+                        <span className="trail-favorite-badge" title="Favorited">
+                          ★
+                        </span>
+                      )}
+                    </div>
+
                     {trail.user?.username && (
                       <p
                         className="trail-card-username"
                         onClick={(e) => {
-                          e.stopPropagation(); // Prevent parent click
-                          navigate(`/user-moments/${trail.user._id || trail.user.id}`);
+                          e.stopPropagation();
+                          navigate(
+                            `/user-moments/${trail.user._id || trail.user.id}`
+                          );
                         }}
                       >
                         {trail.user.username}
@@ -337,7 +335,6 @@ function Dashboard() {
           )}
         </div>
 
-        {/* ── My Trail Moment ── */}
         <div className="moments-section my-moments">
           {!user ? (
             <>
@@ -382,6 +379,7 @@ function Dashboard() {
                   Create post
                 </button>
               </div>
+
               <div className="trails-grid">
                 {myTrails.map((trail) => (
                   <div
@@ -394,8 +392,16 @@ function Dashboard() {
                     ) : (
                       <div className="no-image-container">No Image</div>
                     )}
+
                     <div className="trail-info">
-                      <h3>{trail.title}</h3>
+                      <div className="trail-card-title-row">
+                        <h3>{trail.title}</h3>
+                        {isFavoritedByCurrentUser(trail) && (
+                          <span className="trail-favorite-badge" title="Favorited">
+                            ★
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -420,7 +426,9 @@ function Dashboard() {
                 >
                   Distance
                   <span
-                    className={`dropdown-arrow ${isDistanceDropdownOpen ? "open" : ""}`}
+                    className={`dropdown-arrow ${
+                      isDistanceDropdownOpen ? "open" : ""
+                    }`}
                   >
                     &#9662;
                   </span>
@@ -433,16 +441,18 @@ function Dashboard() {
                         ? "Any"
                         : `${minDistance}–${maxDistance} km`}
                     </div>
+
                     <div
                       className="dual-range-wrapper"
                       style={{
-                        '--fill-left': `${(minDistance / 30) * 100}%`,
-                        '--fill-right': `${((30 - maxDistance) / 30) * 100}%`,
+                        "--fill-left": `${(minDistance / 30) * 100}%`,
+                        "--fill-right": `${((30 - maxDistance) / 30) * 100}%`,
                       }}
                     >
                       <div className="dual-range-track">
                         <div className="dual-range-fill" />
                       </div>
+
                       <input
                         type="range"
                         min="0"
@@ -454,6 +464,7 @@ function Dashboard() {
                         }}
                         className="dual-range-input"
                       />
+
                       <input
                         type="range"
                         min="0"
@@ -466,10 +477,12 @@ function Dashboard() {
                         className="dual-range-input"
                       />
                     </div>
+
                     <div className="dual-range-endpoints">
                       <span>0 km</span>
                       <span>30 km+</span>
                     </div>
+
                     {(minDistance > 0 || maxDistance < 30) && (
                       <button
                         className="distance-clear-button"
@@ -496,7 +509,9 @@ function Dashboard() {
                 >
                   Dog Friendly
                   <span
-                    className={`dropdown-arrow ${isDogFriendlyDropdownOpen ? "open" : ""}`}
+                    className={`dropdown-arrow ${
+                      isDogFriendlyDropdownOpen ? "open" : ""
+                    }`}
                   >
                     &#9662;
                   </span>
@@ -536,7 +551,9 @@ function Dashboard() {
                 >
                   Difficulty
                   <span
-                    className={`dropdown-arrow ${isDifficultyDropdownOpen ? "open" : ""}`}
+                    className={`dropdown-arrow ${
+                      isDifficultyDropdownOpen ? "open" : ""
+                    }`}
                   >
                     &#9662;
                   </span>
