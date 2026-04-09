@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -49,7 +50,10 @@ export function AuthProvider({ children }) {
     !localStorage.getItem("token")
   );
 
+  const requestVersionRef = useRef(0);
+
   const logout = useCallback(() => {
+    requestVersionRef.current += 1;
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setToken(null);
@@ -58,6 +62,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = useCallback((newToken, newUser = null) => {
+    requestVersionRef.current += 1;
+
     localStorage.setItem("token", newToken);
 
     const resolvedUser = newUser || safeDecodeToken(newToken);
@@ -75,9 +81,10 @@ export function AuthProvider({ children }) {
   }, []);
 
   const validateSession = useCallback(async () => {
-    const currentToken = localStorage.getItem("token");
+    const tokenAtStart = localStorage.getItem("token");
+    const requestVersionAtStart = requestVersionRef.current;
 
-    if (!currentToken) {
+    if (!tokenAtStart) {
       setAuthChecked(true);
       setToken(null);
       setUser(null);
@@ -87,9 +94,16 @@ export function AuthProvider({ children }) {
     try {
       const res = await fetch("http://localhost:5000/api/users/me", {
         headers: {
-          Authorization: `Bearer ${currentToken}`,
+          Authorization: `Bearer ${tokenAtStart}`,
         },
       });
+
+      if (
+        requestVersionAtStart !== requestVersionRef.current ||
+        localStorage.getItem("token") !== tokenAtStart
+      ) {
+        return false;
+      }
 
       const contentType = res.headers.get("content-type");
       let data = null;
@@ -98,9 +112,16 @@ export function AuthProvider({ children }) {
         data = await res.json();
       }
 
+      if (
+        requestVersionAtStart !== requestVersionRef.current ||
+        localStorage.getItem("token") !== tokenAtStart
+      ) {
+        return false;
+      }
+
       if (res.ok && data?.user) {
         localStorage.setItem("user", JSON.stringify(data.user));
-        setToken(currentToken);
+        setToken(tokenAtStart);
         setUser(data.user);
         setAuthChecked(true);
         return true;
@@ -114,6 +135,13 @@ export function AuthProvider({ children }) {
       setAuthChecked(true);
       return false;
     } catch (err) {
+      if (
+        requestVersionAtStart !== requestVersionRef.current ||
+        localStorage.getItem("token") !== tokenAtStart
+      ) {
+        return false;
+      }
+
       console.error("Session validation failed:", err);
       setAuthChecked(true);
       return false;
@@ -153,29 +181,56 @@ export function AuthProvider({ children }) {
   }, [token, validateSession]);
 
   const refreshUser = useCallback(async () => {
-    if (!token) return null;
-    
+    const tokenAtStart = localStorage.getItem("token");
+    const requestVersionAtStart = requestVersionRef.current;
+
+    if (!tokenAtStart) return null;
+
     try {
       const res = await fetch("http://localhost:5000/api/users/me", {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${tokenAtStart}`,
+        },
       });
-      
+
+      if (
+        requestVersionAtStart !== requestVersionRef.current ||
+        localStorage.getItem("token") !== tokenAtStart
+      ) {
+        return null;
+      }
+
       if (!res.ok) {
         throw new Error("Failed to refresh user data");
       }
-      
+
       const data = await res.json();
       const freshUserData = data.user;
-      
+
+      if (
+        requestVersionAtStart !== requestVersionRef.current ||
+        localStorage.getItem("token") !== tokenAtStart
+      ) {
+        return null;
+      }
+
       localStorage.setItem("user", JSON.stringify(freshUserData));
       setUser(freshUserData);
-      
+      setToken(tokenAtStart);
+
       return freshUserData;
     } catch (err) {
+      if (
+        requestVersionAtStart !== requestVersionRef.current ||
+        localStorage.getItem("token") !== tokenAtStart
+      ) {
+        return null;
+      }
+
       console.error("Failed to refresh user:", err);
       return null;
     }
-  }, [token]);
+  }, []);
 
   const value = useMemo(
     () => ({
